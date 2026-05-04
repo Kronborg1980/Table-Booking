@@ -9,7 +9,6 @@
             --glass-bg: rgba(15, 23, 42, 0.85);
             --glass-border: rgba(255, 255, 255, 0.15);
             --accent: #0ea5e9;
-            --accent-hover: #38bdf8;
             --surface: #e2e8f0;
             --chair: #64748b;
             --text: #f8fafc;
@@ -23,83 +22,55 @@
             color: var(--text); overflow: hidden;
         }
 
-        /* Glass Sidebar */
         #sidebar {
-            width: 320px; background: var(--glass-bg); backdrop-filter: blur(12px);
+            width: 340px; background: var(--glass-bg); backdrop-filter: blur(12px);
             border-right: 1px solid var(--glass-border); display: flex; flex-direction: column;
-            padding: 20px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+            padding: 20px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5); overflow-y: auto;
         }
 
-        h2 { font-weight: 300; margin: 0 0 20px 0; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); font-size: 24px; letter-spacing: 1px; }
+        h2 { font-weight: 300; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); font-size: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        h3 { font-size: 14px; color: var(--accent); margin: 15px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
 
-        .control-group { margin-bottom: 15px; }
-        label { display: block; font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+        .control-group { margin-bottom: 12px; }
+        label { display: block; font-size: 10px; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; font-weight: 600; }
         input, select {
             width: 100%; box-sizing: border-box; padding: 10px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border); color: white; border-radius: 6px; outline: none;
+            border: 1px solid var(--glass-border); color: white; border-radius: 6px; outline: none; font-family: inherit;
         }
         input:focus, select:focus { border-color: var(--accent); }
         option { background: #0f172a; color: white; }
 
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+
         button {
             width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold;
-            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; margin-top: 5px;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; margin-top: 5px; font-size: 11px;
         }
         .btn-add { background: var(--accent); color: #0f172a; }
-        .btn-add:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
+        .btn-add:hover { background: #38bdf8; }
         .btn-save { background: #10b981; color: white; margin-top: 20px; }
         .btn-save:hover { background: #34d399; }
         .btn-clear { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
         .btn-clear:hover { background: var(--danger); color: white; }
 
-        /* HUD Stats */
-        .hud {
-            background: rgba(0,0,0,0.4); border-radius: 8px; padding: 15px; margin-top: auto;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; border: 1px solid var(--glass-border);
-        }
-        .hud-val { font-size: 24px; font-weight: bold; color: var(--accent); }
-        .hud-label { font-size: 10px; text-transform: uppercase; color: #cbd5e1; }
+        .time-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 4px 4px 0 0; font-size: 11px; border: 1px solid var(--glass-border); }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        /* Workspace */
         #workspace { flex-grow: 1; position: relative; overflow: auto; background: rgba(15, 23, 42, 0.6); }
-        #canvas {
-            width: 2000px; height: 1500px; position: relative;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
+        #canvas { width: 2000px; height: 1500px; position: relative; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; }
 
-        /* Dynamic Table Nodes */
-        .table-node {
-            position: absolute; display: flex; align-items: center; justify-content: center;
-            cursor: grab; user-select: none; transform-origin: center center;
-        }
+        .table-node { position: absolute; display: flex; align-items: center; justify-content: center; cursor: grab; user-select: none; transform-origin: center center; }
         .table-node:active { cursor: grabbing; z-index: 100; }
         
-        .surface {
-            background: var(--surface); color: #0f172a; border: 2px solid #334155;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-weight: bold; z-index: 10; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: border-color 0.3s;
-        }
+        .surface { background: var(--surface); color: #0f172a; border: 2px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .is-window .surface { border-color: var(--accent); box-shadow: 0 0 15px rgba(14,165,233,0.5); }
-        
-        .chair {
-            position: absolute; background: var(--chair); border: 1px solid #334155;
-            border-radius: 50%; width: 14px; height: 14px; z-index: 5;
-        }
+        .chair { position: absolute; background: var(--chair); border: 1px solid #334155; border-radius: 50%; width: 14px; height: 14px; z-index: 5; }
 
-        /* Node Hover Menu */
-        .node-menu {
-            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
-            background: var(--glass-bg); padding: 5px; border-radius: 6px; display: none;
-            gap: 5px; z-index: 20; border: 1px solid var(--glass-border);
-        }
+        .node-menu { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); padding: 5px; border-radius: 6px; display: none; gap: 5px; z-index: 20; border: 1px solid var(--glass-border); }
         .table-node:hover .node-menu { display: flex; }
-        .node-btn { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .node-btn { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; text-transform: none; margin: 0; width: auto; }
         .node-btn:hover { background: var(--accent); }
-        .node-btn-del:hover { background: var(--danger); }
     </style>
 </head>
 <body>
@@ -107,20 +78,34 @@
 <div id="sidebar">
     <h2>Fleet Architect</h2>
     
+    <!-- Timeline Settings -->
+    <h3>Dining Shifts</h3>
+    <div class="control-group flex-row">
+        <input type="time" id="s-time" value="18:00">
+        <input type="color" id="s-color" value="#10b981">
+        <button class="btn-add" style="margin:0; width:auto; padding: 0 15px;" id="addShiftBtn">+</button>
+    </div>
+    <div class="control-group">
+        <label>Turnaround Time (Minutes)</label>
+        <input type="number" id="s-duration" value="90">
+    </div>
+    <div id="shift-list" style="margin-bottom: 20px;"></div>
+
+    <!-- Table Building -->
+    <h3>Table Deployment</h3>
     <div class="control-group">
         <label>Table ID (Auto-Increments)</label>
         <input type="text" id="t-id" placeholder="e.g., 60">
     </div>
 
     <div class="control-group">
-        <label>Configuration (Face-to-Face)</label>
+        <label>Configuration (Geometry)</label>
         <select id="t-config">
-            <option value="square|2">Square - 2 Seats (1v1)</option>
+            <option value="square|2">Narrow - 2 Seats (1v1)</option>
             <option value="square|4" selected>Square - 4 Seats (2v2)</option>
             <option value="rect|6">Rectangle - 6 Seats (3v3)</option>
             <option value="round|4">Round - 4 Seats</option>
             <option value="round|6">Round - 6 Seats</option>
-            <option value="round|8">Round - 8 Seats</option>
         </select>
     </div>
 
@@ -132,23 +117,12 @@
         </select>
     </div>
 
-    <button class="btn-add" onclick="addTable()">Deploy Table To Deck</button>
+    <button class="btn-add" id="addTableBtn">Deploy Table</button>
     
-    <div style="flex-grow: 1;"></div> <!-- Spacer -->
+    <div style="flex-grow: 1;"></div>
 
-    <div class="hud">
-        <div>
-            <div class="hud-val" id="stat-tables">0</div>
-            <div class="hud-label">Total Tables</div>
-        </div>
-        <div>
-            <div class="hud-val" id="stat-pax">0</div>
-            <div class="hud-label">Max Pax</div>
-        </div>
-    </div>
-
-    <button class="btn-save" onclick="saveDeck()">💾 Commit To Manifest</button>
-    <button class="btn-clear" onclick="wipeDeck()">⚠️ Purge Deck</button>
+    <button class="btn-save" id="saveBtn">💾 Commit Manifest</button>
+    <button class="btn-clear" id="wipeBtn">⚠️ Purge Deck</button>
 </div>
 
 <div id="workspace">
@@ -156,51 +130,66 @@
 </div>
 
 <script>
+    // Pure Vanilla JS without inline HTML event handlers to pass strict linters
     let deck = JSON.parse(localStorage.getItem('skansagadur_manifest_2025')) || [];
+    let settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { duration: 90, shifts: [] };
+    
     const canvas = document.getElementById('canvas');
+    const shiftList = document.getElementById('shift-list');
     let dragObj = null, offsetX = 0, offsetY = 0;
+
+    function renderShifts() {
+        shiftList.innerHTML = '';
+        settings.shifts.forEach((s, index) => {
+            const badge = document.createElement('div');
+            badge.className = 'time-badge';
+            badge.innerHTML = `<div class="color-dot" style="background:${s.color}"></div> ${s.time} <span style="cursor:pointer; color:#ef4444;" data-index="${index}" class="del-shift">✕</span>`;
+            shiftList.appendChild(badge);
+        });
+
+        document.querySelectorAll('.del-shift').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const idx = e.target.getAttribute('data-index');
+                settings.shifts.splice(idx, 1);
+                renderShifts();
+            });
+        });
+    }
 
     function renderDeck() {
         canvas.innerHTML = '';
-        let totalPax = 0;
-
         deck.forEach(t => {
-            totalPax += t.seats;
             const node = document.createElement('div');
             node.className = `table-node ${t.win ? 'is-window' : ''}`;
             node.id = `t-${t.id}`;
             node.style.left = `${t.x}px`;
             node.style.top = `${t.y}px`;
             
-            // Mathematical Geometry Renderer
-            let surfaceW, surfaceH, br;
-            let chairsHTML = '';
+            let surfaceW, surfaceH, br, chairsHTML = '';
 
             if (t.shape === 'square' || t.shape === 'rect') {
                 br = '6px';
-                if (t.seats === 2) { surfaceW = 40; surfaceH = 40; }
-                if (t.seats === 4) { surfaceW = 56; surfaceH = 50; }
-                if (t.seats === 6) { surfaceW = 80; surfaceH = 50; }
+                if (t.seats === 2) { 
+                    surfaceW = 26; surfaceH = 40; // Extremely narrow for 2-person
+                } else if (t.seats === 4) { 
+                    surfaceW = 56; surfaceH = 50; 
+                } else if (t.seats === 6) { 
+                    surfaceW = 80; surfaceH = 50; 
+                }
 
-                // Calculate Face-to-Face Chairs (Top and Bottom edges)
-                const chairSpacing = 22; 
-                const startX = (surfaceW - (t.seats/2 * chairSpacing)) / 2 + 4;
+                const spacing = 22; 
+                const startX = (surfaceW - (t.seats/2 * spacing)) / 2 + 4;
 
                 for(let i=0; i < t.seats/2; i++) {
-                    const cx = startX + (i * chairSpacing);
-                    // Top Row
-                    chairsHTML += `<div class="chair" style="left:${cx}px; top:-8px;"></div>`;
-                    // Bottom Row
-                    chairsHTML += `<div class="chair" style="left:${cx}px; bottom:-8px;"></div>`;
+                    const cx = startX + (i * spacing);
+                    chairsHTML += `<div class="chair" style="left:${cx}px; top:-8px;"></div><div class="chair" style="left:${cx}px; bottom:-8px;"></div>`;
                 }
             } else if (t.shape === 'round') {
                 br = '50%';
-                surfaceW = t.seats === 8 ? 70 : (t.seats === 6 ? 60 : 50);
+                surfaceW = t.seats === 6 ? 60 : 50;
                 surfaceH = surfaceW;
-                
-                // Radial Distribution
                 const radius = (surfaceW / 2) + 4;
-                const center = (surfaceW / 2) - 7; // -7 centers the 14px chair
+                const center = (surfaceW / 2) - 7;
 
                 for(let i=0; i < t.seats; i++) {
                     const angle = (i * (360 / t.seats)) * (Math.PI / 180);
@@ -218,12 +207,12 @@
                 ${chairsHTML}
                 <div class="surface" style="width:100%; height:100%; border-radius:${br};">
                     <span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">
-                        ${t.id}<span style="font-size:9px; font-weight:normal;">${t.seats}px</span>
+                        ${t.id}<span style="font-size:9px; font-weight:normal;">${t.seats}</span>
                     </span>
                 </div>
                 <div class="node-menu" style="transform: translateX(-50%) rotate(-${t.rotation || 0}deg);">
-                    <button class="node-btn" onmousedown="rotateTable('${t.id}', event)">↻ Rotate</button>
-                    <button class="node-btn node-btn-del" onmousedown="deleteTable('${t.id}', event)">✕</button>
+                    <button class="node-btn rotate-btn" data-id="${t.id}">↻</button>
+                    <button class="node-btn del-btn" style="background:#ef4444;" data-id="${t.id}">✕</button>
                 </div>
             `;
             
@@ -231,84 +220,77 @@
             canvas.appendChild(node);
         });
 
-        // Update HUD
-        document.getElementById('stat-tables').innerText = deck.length;
-        document.getElementById('stat-pax').innerText = totalPax;
+        // Attach event listeners safely
+        document.querySelectorAll('.rotate-btn').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                let t = deck.find(x => x.id === e.target.getAttribute('data-id'));
+                if(t) t.rotation = ((t.rotation || 0) + 90) % 360;
+                renderDeck();
+            });
+        });
+
+        document.querySelectorAll('.del-btn').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                deck = deck.filter(x => x.id !== e.target.getAttribute('data-id'));
+                renderDeck();
+            });
+        });
     }
 
-    function addTable() {
+    // Wiring up sidebar buttons
+    document.getElementById('addShiftBtn').addEventListener('click', () => {
+        const time = document.getElementById('s-time').value;
+        const color = document.getElementById('s-color').value;
+        if(time && !settings.shifts.find(s => s.time === time)) {
+            settings.shifts.push({ time, color });
+            renderShifts();
+        }
+    });
+
+    document.getElementById('addTableBtn').addEventListener('click', () => {
         const idInput = document.getElementById('t-id');
         let id = idInput.value.trim();
-        if(!id) return alert("Table ID is required.");
-        if(deck.find(x => x.id === id)) return alert("Table ID already exists.");
+        if(!id || deck.find(x => x.id === id)) return alert("Invalid or duplicate ID.");
 
         const config = document.getElementById('t-config').value.split('|');
-        const shape = config[0];
-        const seats = parseInt(config[1]);
-        const win = document.getElementById('t-win').value === 'true';
-
-        deck.push({ id, shape, seats, win, x: 200, y: 200, rotation: 0 });
+        deck.push({ id, shape: config[0], seats: parseInt(config[1]), win: document.getElementById('t-win').value === 'true', x: 200, y: 200, rotation: 0 });
         
-        // Auto-increment logic
         let numVal = parseInt(id.replace(/\D/g, ''));
-        if(!isNaN(numVal)) {
-            idInput.value = id.replace(numVal, numVal + 1);
-        } else {
-            idInput.value = '';
-        }
-
+        if(!isNaN(numVal)) idInput.value = id.replace(numVal, numVal + 1);
         renderDeck();
-    }
+    });
 
-    function rotateTable(id, e) {
-        e.stopPropagation();
-        let t = deck.find(x => x.id === id);
-        if(t) t.rotation = ((t.rotation || 0) + 90) % 360;
-        renderDeck();
-    }
-
-    function deleteTable(id, e) {
-        e.stopPropagation();
-        deck = deck.filter(x => x.id !== id);
-        renderDeck();
-    }
-
-    function saveDeck() {
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        settings.duration = parseInt(document.getElementById('s-duration').value);
         localStorage.setItem('skansagadur_manifest_2025', JSON.stringify(deck));
-        alert("Deck configuration committed to local storage.");
-    }
+        localStorage.setItem('skansagadur_settings_2025', JSON.stringify(settings));
+        alert("Manifest and Settings Saved!");
+    });
 
-    function wipeDeck() {
-        if(confirm("DANGER: This purges the entire deck layout. Proceed?")) {
+    document.getElementById('wipeBtn').addEventListener('click', () => {
+        if(confirm("DANGER: Purge entire deck?")) {
             deck = [];
             localStorage.removeItem('skansagadur_manifest_2025');
             renderDeck();
         }
-    }
+    });
 
-    // Canvas Dragging Engine
+    // Dragging Logic
     function startDrag(e) {
         if(e.target.tagName === 'BUTTON') return;
         dragObj = e.currentTarget;
-        offsetX = e.clientX - dragObj.getBoundingClientRect().left;
-        offsetY = e.clientY - dragObj.getBoundingClientRect().top;
-        
-        // Compensate for workspace scroll position
         const workspace = document.getElementById('workspace');
-        offsetX += workspace.scrollLeft;
-        offsetY += workspace.scrollTop;
+        offsetX = e.clientX - dragObj.getBoundingClientRect().left + workspace.scrollLeft;
+        offsetY = e.clientY - dragObj.getBoundingClientRect().top + workspace.scrollTop;
     }
 
     document.addEventListener('mousemove', (e) => {
         if(dragObj) {
             const workspace = document.getElementById('workspace');
-            let newX = e.clientX - offsetX + workspace.scrollLeft;
-            let newY = e.clientY - offsetY + workspace.scrollTop;
-            
-            // 10px Grid Snap
-            newX = Math.round(newX / 10) * 10;
-            newY = Math.round(newY / 10) * 10;
-
+            let newX = Math.round((e.clientX - offsetX + workspace.scrollLeft) / 10) * 10;
+            let newY = Math.round((e.clientY - offsetY + workspace.scrollTop) / 10) * 10;
             dragObj.style.left = `${newX}px`;
             dragObj.style.top = `${newY}px`;
         }
@@ -318,14 +300,13 @@
         if(dragObj) {
             const id = dragObj.id.replace('t-', '');
             const t = deck.find(x => x.id === id);
-            if(t) {
-                t.x = parseInt(dragObj.style.left);
-                t.y = parseInt(dragObj.style.top);
-            }
+            if(t) { t.x = parseInt(dragObj.style.left); t.y = parseInt(dragObj.style.top); }
             dragObj = null;
         }
     });
 
+    document.getElementById('s-duration').value = settings.duration;
+    renderShifts();
     renderDeck();
 </script>
 </body>
