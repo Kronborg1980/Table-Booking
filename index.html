@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Skansagadur 2025 - Interactive Seating</title>
+    <style>
+        :root {
+            --ship-blue: #003366;
+            --window-cyan: #00d4ff;
+            --occupied: #ff4757;
+            --empty: #2ed573;
+        }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styles */
+        #sidebar { width: 350px; background: #2f3542; color: white; padding: 20px; display: flex; flex-direction: column; }
+        textarea { flex-grow: 1; width: 100%; background: #57606f; border: none; color: white; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        
+        /* Restaurant Floor Plan */
+        #floor-plan { flex-grow: 1; background: #f1f2f6; position: relative; overflow: auto; padding: 50px; }
+        .ship-hull { 
+            position: relative; width: 1200px; height: 800px; 
+            background: white; border: 4px solid var(--ship-blue); border-radius: 100px 500px 500px 100px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Table Styling */
+        .table {
+            position: absolute; width: 50px; height: 50px;
+            border-radius: 8px; border: 2px solid #747d8c;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; cursor: pointer;
+            transition: all 0.2s; background: white;
+        }
+        .table.window { border-left: 5px solid var(--window-cyan); }
+        .table.occupied { background: var(--occupied); color: white; border-color: #b33939; }
+        .table.available { background: var(--empty); color: white; border-color: #1b8a4a; }
+        
+        .area-label { position: absolute; font-weight: bold; color: #a4b0be; text-transform: uppercase; letter-spacing: 2px; }
+        
+        button { background: var(--ship-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>Skansagadur 2025</h2>
+    <label>Paste Bookings (Name, Guests, Window_Y/N)</label>
+    <textarea id="rawInput" placeholder="Soren Jensen, 4, Y&#10;Marni Larsen, 2, N"></textarea>
+    <button onclick="autoAllocate()">Run Auto-Allocation</button>
+    <div id="status" style="margin-top:20px; font-size: 0.9em;"></div>
+</div>
+
+<div id="floor-plan">
+    <div class="ship-hull" id="hull">
+        <!-- Labels -->
+        <div class="area-label" style="top: 20px; left: 400px;">Window Side (Port)</div>
+        <div class="area-label" style="top: 380px; left: 550px;">Bar Area</div>
+        <div class="area-label" style="bottom: 20px; left: 400px;">Kitchen Side (Starboard)</div>
+        
+        <!-- Tables will be generated here -->
+    </div>
+</div>
+
+<script>
+    // Data model based on "Bordplan Skansagadur 2025.pdf"
+    const tableData = [
+        // Top Row (Window)
+        { id: 67, x: 100, y: 50, cap: 4, win: true },
+        { id: 74, x: 170, y: 50, cap: 4, win: true },
+        { id: 75, x: 240, y: 50, cap: 2, win: true },
+        { id: 82, x: 310, y: 50, cap: 4, win: true },
+        // Middle Sections
+        { id: 60, x: 100, y: 150, cap: 4, win: false },
+        { id: 61, x: 170, y: 150, cap: 6, win: false },
+        { id: 66, x: 240, y: 150, cap: 4, win: false },
+        // Bar Area
+        { id: 73, x: 500, y: 350, cap: 2, win: false },
+        { id: 76, x: 570, y: 350, cap: 2, win: false },
+        // Bottom Row (Kitchen/Window)
+        { id: 101, x: 100, y: 650, cap: 4, win: true },
+        { id: 102, x: 170, y: 650, cap: 4, win: true },
+        { id: 104, x: 240, y: 650, cap: 4, win: true }
+        // Note: You can add all 114+ table IDs here following the PDF layout
+    ];
+
+    let currentAllocations = new Map();
+
+    function renderTables() {
+        const hull = document.getElementById('hull');
+        tableData.forEach(t => {
+            const div = document.createElement('div');
+            div.id = `t-${t.id}`;
+            div.className = `table ${t.win ? 'window' : ''}`;
+            div.style.left = t.x + 'px';
+            div.style.top = t.y + 'px';
+            
+            const guest = currentAllocations.get(t.id);
+            if (guest) {
+                div.classList.add('occupied');
+                div.innerHTML = `${t.id}<br><small>${guest.name}</small>`;
+            } else {
+                div.classList.add('available');
+                div.innerHTML = `${t.id}<br><small>${t.cap}</small>`;
+            }
+            
+            div.onclick = () => moveBooking(t.id);
+            hull.appendChild(div);
+        });
+    }
+
+    function autoAllocate() {
+        currentAllocations.clear();
+        const input = document.getElementById('rawInput').value.trim();
+        if(!input) return;
+
+        const bookings = input.split('\n').map(line => {
+            const [name, qty, win] = line.split(',');
+            return { name: name.trim(), qty: parseInt(qty), win: win?.trim().toUpperCase() === 'Y' };
+        });
+
+        // Sorting Logic: Priority Window, then largest group
+        bookings.sort((a, b) => (b.win - a.win) || (b.qty - a.qty));
+
+        bookings.forEach(booking => {
+            // Find best fit: Window match + Size match
+            let targetTable = tableData.find(t => 
+                !currentAllocations.has(t.id) && 
+                t.cap >= booking.qty && 
+                (booking.win ? t.win : true)
+            );
+
+            // Fallback: Just any table that fits
+            if (!targetTable) {
+                targetTable = tableData.find(t => !currentAllocations.has(t.id) && t.cap >= booking.qty);
+            }
+
+            if (targetTable) {
+                currentAllocations.set(targetTable.id, booking);
+            }
+        });
+
+        const hull = document.getElementById('hull');
+        hull.querySelectorAll('.table').forEach(el => el.remove());
+        renderTables();
+    }
+
+    function moveBooking(tableId) {
+        const booking = currentAllocations.get(tableId);
+        if (!booking) return;
+
+        const newTable = prompt(`Move ${booking.name} to which table ID?`);
+        const targetId = parseInt(newTable);
+        
+        if (tableData.find(t => t.id === targetId)) {
+            currentAllocations.delete(tableId);
+            currentAllocations.set(targetId, booking);
+            const hull = document.getElementById('hull');
+            hull.querySelectorAll('.table').forEach(el => el.remove());
+            renderTables();
+        }
+    }
+
+    renderTables();
+</script>
+
+</body>
+</html>
