@@ -2,156 +2,199 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ship Dining Allocator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Dining Commander</title>
     <style>
-        body { font-family: sans-serif; display: flex; margin: 0; height: 100vh; background: #f0f2f5; }
-        
-        /* Sidebar */
-        #sidebar { width: 350px; background: white; padding: 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
-        textarea { width: 100%; height: 200px; padding: 10px; box-sizing: border-box; font-family: monospace; }
-        button { background: #004a99; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        button:hover { background: #003366; }
-        .error { color: #d9534f; font-size: 14px; font-weight: bold; }
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #38bdf8;
+            --occupied: #10b981;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+        }
 
-        /* Map Area */
-        #map-area { flex-grow: 1; overflow: auto; padding: 40px; position: relative; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; height: 100vh; display: flex;
+            background: url('https://www.smyrilline.dk/wp-content/uploads/2025/04/Norrona.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-main); overflow: hidden;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 360px; background: var(--glass-bg); backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border); padding: 30px;
+            display: flex; flex-direction: column; gap: 15px; z-index: 10;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.6);
+        }
+
+        h2 { margin: 0; font-size: 22px; font-weight: 400; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+
+        textarea {
+            width: 100%; height: 250px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border); color: #fff; padding: 15px;
+            border-radius: 8px; font-family: monospace; line-height: 1.5; resize: none; box-sizing: border-box; outline: none;
+        }
+        textarea:focus { border-color: var(--accent); }
+
+        button {
+            background: var(--accent); color: #0f172a; padding: 15px; border: none;
+            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 1px; transition: 0.3s;
+        }
+        button:hover { background: #7dd3fc; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
+
+        .error-log { margin-top: 15px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
+
+        /* Canvas Area */
+        #map-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         
-        /* Table Styles (Matching Admin) */
-        .table { position: absolute; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; text-align: center; flex-direction: column; transition: 0.2s; background: #e2e3e5; width: 50px; height: 50px; }
-        .window { border: 3px solid #00a8ff; }
-        .table.occupied { background: #d1e7dd; border-color: #0f5132; color: #0f5132; cursor: pointer; }
-        .table.occupied:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        #canvas {
+            width: 900px; height: 800px; background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        }
+
+        /* Tables */
+        .table-node {
+            position: absolute; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold; transition: all 0.3s ease; text-align: center;
+        }
+        
+        .shape-square { width: 50px; height: 50px; border-radius: 8px; }
+        .shape-circle { width: 60px; height: 60px; border-radius: 50%; }
+        .shape-rect-v { width: 40px; height: 70px; border-radius: 8px; }
+        .shape-rect-h { width: 70px; height: 40px; border-radius: 8px; }
+
+        .is-window { box-shadow: 0 0 0 2px var(--accent), 0 0 10px rgba(56,189,248,0.5); }
+        
+        .table-node.occupied {
+            background: var(--occupied); color: #064e3b; border-color: #047857;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); cursor: pointer;
+        }
+        .table-node.occupied:hover { transform: scale(1.1); z-index: 50; }
+        .table-node.occupied .guest-name { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2>Restaurant Bookings</h2>
-    <p style="font-size: 14px; color: #666;">Format: <strong>Name, Guests, Window (Y/N)</strong><br>Example: <i>John Doe, 4, Y</i></p>
-    <textarea id="bookingInput" placeholder="Soren, 4, Y&#10;Marni, 2, N"></textarea>
-    <button onclick="allocateTables()">Allocate Tables</button>
-    <div id="unseated" class="error"></div>
+    <h2>Captain's Log: Dining</h2>
+    <p style="font-size: 12px; color: #cbd5e1; margin: 0;">Enter bookings: <strong>Name, Party Size, Window (Y/N)</strong></p>
+    <textarea id="bookingInput" placeholder="Soren Jensen, 4, Y&#10;Marni Larsen, 2, N"></textarea>
+    <button onclick="executeSeating()">Launch Allocation Protocol</button>
+    <div id="unseated" class="error-log"></div>
 </div>
 
 <div id="map-area">
-    <!-- Tables inject here -->
+    <div id="canvas"></div>
 </div>
 
 <script>
-    // Load layout saved from admin.html
-    let layout = JSON.parse(localStorage.getItem('shipLayout')) || [];
-    let allocations = new Map();
+    let layout = JSON.parse(localStorage.getItem('premiumShipLayout')) || [];
+    let activeAllocations = new Map();
 
-    function initMap() {
-        const mapArea = document.getElementById('map-area');
-        mapArea.innerHTML = '';
+    function initDeck() {
+        const canvas = document.getElementById('canvas');
+        canvas.innerHTML = '';
         
         if(layout.length === 0) {
-            mapArea.innerHTML = "<h3>No map found. Please build one in admin.html first.</h3>";
+            canvas.innerHTML = "<div style='color:white; display:flex; height:100%; align-items:center; justify-content:center;'><h3>No Deck Plan Found. Please build in Admin Builder first.</h3></div>";
             return;
         }
 
         layout.forEach(t => {
             const el = document.createElement('div');
-            el.className = `table ${t.win ? 'window' : ''}`;
+            el.className = `table-node shape-${t.shape} ${t.win ? 'is-window' : ''}`;
             el.id = `table-${t.id}`;
             el.style.left = t.x + 'px';
             el.style.top = t.y + 'px';
             
-            const booking = allocations.get(t.id);
+            const booking = activeAllocations.get(t.id);
             if(booking) {
                 el.classList.add('occupied');
-                el.innerHTML = `${t.id}<br><small>${booking.name}</small>`;
-                el.title = `Click to move ${booking.name}`;
-                el.onclick = () => moveBooking(t.id);
+                el.innerHTML = `${t.id}<br><span class="guest-name">${booking.name}</span>`;
+                el.title = `Click to re-assign ${booking.name}`;
+                el.onclick = () => manualReassign(t.id);
             } else {
-                el.innerHTML = `${t.id}<br><small>(${t.cap})</small>`;
+                el.innerHTML = `${t.id}<br><span style="font-size:10px; font-weight:normal; opacity:0.5">${t.cap} empty</span>`;
             }
-            
-            mapArea.appendChild(el);
+            canvas.appendChild(el);
         });
     }
 
-    function allocateTables() {
-        allocations.clear(); // Reset
-        const rawText = document.getElementById('bookingInput').value;
-        const lines = rawText.split('\n').filter(l => l.trim() !== '');
+    function executeSeating() {
+        activeAllocations.clear();
+        const lines = document.getElementById('bookingInput').value.trim().split('\n');
         
-        let bookings = lines.map(line => {
+        let guests = lines.map(line => {
             const parts = line.split(',');
             return {
                 name: parts[0]?.trim(),
-                qty: parseInt(parts[1]),
-                win: parts[2]?.trim().toUpperCase() === 'Y'
+                size: parseInt(parts[1]),
+                winReq: parts[2]?.trim().toUpperCase() === 'Y'
             };
-        }).filter(b => b.name && !isNaN(b.qty));
+        }).filter(g => g.name && !isNaN(g.size));
 
-        // Priority 1: Window requests. Priority 2: Group size (largest first)
-        bookings.sort((a, b) => (b.win - a.win) || (b.qty - a.qty));
+        // Sorting Matrix: Prioritize Window Requests, then Party Size
+        guests.sort((a, b) => (b.winReq - a.winReq) || (b.size - a.size));
 
-        let unseatedList = [];
+        let failedToSeat = [];
 
-        bookings.forEach(booking => {
-            // Find a table that fits. 
-            // If they want a window, try to find a window table first.
+        guests.forEach(guest => {
+            // Attempt 1: Perfect Match (Fits Size AND Window Request matches)
             let match = layout.find(t => 
-                !allocations.has(t.id) && 
-                t.cap >= booking.qty && 
-                (booking.win ? t.win : true)
+                !activeAllocations.has(t.id) && 
+                t.cap >= guest.size && 
+                (guest.winReq ? t.win : true)
             );
 
-            // Fallback: If no window table, just find ANY table that fits
-            if (!match && booking.win) {
-                match = layout.find(t => !allocations.has(t.id) && t.cap >= booking.qty);
+            // Attempt 2: Compromise (Fits Size, ignores Window request)
+            if (!match && guest.winReq) {
+                match = layout.find(t => !activeAllocations.has(t.id) && t.cap >= guest.size);
             }
 
             if (match) {
-                allocations.set(match.id, booking);
+                activeAllocations.set(match.id, guest);
             } else {
-                unseatedList.push(booking.name);
+                failedToSeat.push(`${guest.name} (${guest.size})`);
             }
         });
 
-        document.getElementById('unseated').innerText = unseatedList.length 
-            ? "Could not seat: " + unseatedList.join(', ') 
-            : "";
+        const errorPanel = document.getElementById('unseated');
+        if (failedToSeat.length > 0) {
+            errorPanel.style.display = 'block';
+            errorPanel.innerHTML = `<strong>Attention Required:</strong><br>Could not seat:<br>• ` + failedToSeat.join('<br>• ');
+        } else {
+            errorPanel.style.display = 'none';
+        }
             
-        initMap();
+        initDeck();
     }
 
-    function moveBooking(fromTableId) {
-        const booking = allocations.get(fromTableId);
-        const toTableId = prompt(`Where would you like to move ${booking.name}?\nEnter Table ID:`);
+    function manualReassign(currentTableId) {
+        const guestData = activeAllocations.get(currentTableId);
+        const newTarget = prompt(`Re-assign ${guestData.name} (Party of ${guestData.size})\nEnter new Table ID:`);
         
-        if (!toTableId) return;
+        if (!newTarget) return;
 
-        // Check if table exists
-        const targetTable = layout.find(t => t.id === toTableId);
-        if (!targetTable) {
-            alert("Table ID does not exist.");
-            return;
+        const tableProfile = layout.find(t => t.id === newTarget);
+        if (!tableProfile) return alert(`Table ${newTarget} does not exist on this deck.`);
+        if (activeAllocations.has(newTarget)) return alert(`Table ${newTarget} is currently occupied.`);
+        
+        if (tableProfile.cap < guestData.size) {
+            if(!confirm(`Warning: Overcapacity. Moving ${guestData.size} guests to a ${tableProfile.cap}-seat table. Proceed?`)) return;
         }
 
-        // Check if table is occupied
-        if (allocations.has(toTableId)) {
-            alert("That table is already occupied!");
-            return;
-        }
-
-        // Check if it fits
-        if (targetTable.cap < booking.qty) {
-            const force = confirm(`Warning: Table ${toTableId} only has ${targetTable.cap} seats, but the group has ${booking.qty} people. Move anyway?`);
-            if(!force) return;
-        }
-
-        // Execute Move
-        allocations.delete(fromTableId);
-        allocations.set(toTableId, booking);
-        initMap();
+        activeAllocations.delete(currentTableId);
+        activeAllocations.set(newTarget, guestData);
+        initDeck();
     }
 
-    // Initialize
-    initMap();
+    initDeck();
 </script>
 </body>
 </html>
