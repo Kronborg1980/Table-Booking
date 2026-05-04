@@ -17,7 +17,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0; height: 100vh; display: flex;
-            background: #1e293b; /* Solid dark background for reliability */
+            background: #1e293b; 
             color: #f8fafc; overflow: hidden;
         }
 
@@ -60,15 +60,24 @@
 
         .chair { position: absolute; background: var(--chair-bg); border: 1px solid #475569; border-radius: 50%; width: 14px; height: 14px; z-index: 1; }
 
+        /* Fixed Geometry for Layouts */
         .layout-square-4 .table-core { width: 40px; height: 40px; border-radius: 4px; }
-        .layout-square-4 .c-top { top: 0px; } .layout-square-4 .c-bot { bottom: 0px; } .layout-square-4 .c-left { left: 0px; } .layout-square-4 .c-right { right: 0px; }
+        .layout-square-4 .c-top { top: 2px; left: 28px; } 
+        .layout-square-4 .c-bot { bottom: 2px; left: 28px; } 
+        .layout-square-4 .c-left { left: 2px; top: 28px; } 
+        .layout-square-4 .c-right { right: 2px; top: 28px; }
 
         .layout-square-2 .table-core { width: 36px; height: 36px; border-radius: 4px; }
-        .layout-square-2 .c-left { left: 2px; } .layout-square-2 .c-right { right: 2px; }
+        .layout-square-2 .c-left { left: 4px; top: 28px; } 
+        .layout-square-2 .c-right { right: 4px; top: 28px; }
 
         .layout-circle-6 .table-core { width: 46px; height: 46px; border-radius: 50%; }
-        .layout-circle-6 .c-1 { top: 0px; left: 28px; } .layout-circle-6 .c-2 { top: 14px; right: -2px; } .layout-circle-6 .c-3 { bottom: 0px; left: 28px; }
-        .layout-circle-6 .c-4 { bottom: 0px; right: 28px; } .layout-circle-6 .c-5 { top: 14px; left: -2px; } .layout-circle-6 .c-6 { top: 0px; right: 28px; }
+        .layout-circle-6 .c-1 { top: 6px; left: 14px; } 
+        .layout-circle-6 .c-2 { top: 6px; right: 14px; } 
+        .layout-circle-6 .c-3 { top: 28px; left: 0px; }
+        .layout-circle-6 .c-4 { top: 28px; right: 0px; } 
+        .layout-circle-6 .c-5 { bottom: 6px; left: 14px; } 
+        .layout-circle-6 .c-6 { bottom: 6px; right: 14px; }
 
         .delete-btn { position: absolute; top: 0; right: 0; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; opacity: 0; z-index: 10; }
         .table-wrapper:hover .delete-btn { opacity: 1; }
@@ -151,7 +160,6 @@
         if (!id) return alert("Please enter a Table ID.");
         if (layout.find(t => t.id === id)) return alert("Table ID already exists.");
 
-        // Explicitly extract the exact capacity from the layout selection
         let capacity = 4;
         if(layoutType === 'square-2') capacity = 2;
         if(layoutType === 'circle-6') capacity = 6;
@@ -178,7 +186,6 @@
         }
     }
 
-    // Drag Logic
     function dragStart(e) {
         if(e.target.classList.contains('delete-btn')) return;
         isDragging = true;
