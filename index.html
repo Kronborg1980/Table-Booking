@@ -3,78 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skansagadur - Dining Allocation</title>
+    <title>Skansagadur - Dining Commander</title>
     <style>
         :root {
             --glass-bg: rgba(15, 23, 42, 0.95);
             --glass-border: rgba(255, 255, 255, 0.15);
             --accent: #0ea5e9;
-            --occupied-bg: #10b981;
-            --occupied-text: #022c22;
             --surface: #e2e8f0;
             --chair: #64748b;
             --text: #f8fafc;
         }
 
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            margin: 0; padding: 0; height: 100vh; display: flex;
-            background: #0f172a; color: var(--text); overflow: hidden;
-        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; background: #0f172a; color: var(--text); overflow: hidden; }
 
-        /* Sidebar */
-        #sidebar {
-            width: 340px; background: var(--glass-bg); border-right: 1px solid var(--glass-border);
-            display: flex; flex-direction: column; padding: 25px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5);
-        }
-
+        #sidebar { width: 360px; background: var(--glass-bg); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 25px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5); }
         h2 { margin: 0 0 5px 0; font-size: 24px; font-weight: 300; }
-        .subtitle { font-size: 11px; color: #94a3b8; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { font-size: 11px; color: #94a3b8; margin-bottom: 15px; letter-spacing: 1px; }
 
-        textarea {
-            width: 100%; height: 300px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
-            color: white; padding: 15px; border-radius: 6px; font-family: monospace; resize: none; outline: none; box-sizing: border-box;
-        }
-        textarea:focus { border-color: var(--accent); }
-
-        button {
-            width: 100%; padding: 15px; background: var(--accent); color: #0f172a; border: none;
-            border-radius: 6px; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 15px; transition: 0.2s;
-        }
+        label { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: bold; margin-bottom: 5px; display: block; }
+        select, textarea { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 6px; outline: none; box-sizing: border-box; font-family: inherit; margin-bottom: 15px; }
+        textarea { height: 250px; font-family: monospace; resize: none; white-space: pre; }
+        
+        button { width: 100%; padding: 15px; background: var(--accent); color: #0f172a; border: none; border-radius: 6px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
         button:hover { background: #38bdf8; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
 
-        .error-log { margin-top: 15px; padding: 15px; background: rgba(239, 68, 68, 0.15); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
+        .error-log { padding: 15px; background: rgba(239, 68, 68, 0.15); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
 
-        /* Workspace */
         #workspace { flex-grow: 1; overflow: auto; position: relative; }
         #canvas { width: 2000px; height: 1500px; position: relative; }
 
-        /* Render Nodes */
         .table-node { position: absolute; display: flex; align-items: center; justify-content: center; transform-origin: center center; }
-        
-        .surface {
-            background: var(--surface); color: #0f172a; border: 2px solid #334155;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-weight: bold; z-index: 10; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.3s;
-        }
+        .surface { background: var(--surface); color: #0f172a; border: 2px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.3s; }
         .is-window .surface { border-color: var(--accent); }
         .chair { position: absolute; background: var(--chair); border: 1px solid #334155; border-radius: 50%; width: 14px; height: 14px; z-index: 5; transition: 0.3s; }
 
-        /* Occupied State */
-        .table-node.occupied .surface { background: var(--occupied-bg); color: var(--occupied-text); border-color: #047857; cursor: pointer; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
-        .table-node.occupied .chair { background: var(--occupied-bg); border-color: #047857; }
+        /* Dynamic Occupied Class */
+        .table-node.occupied .surface { background: var(--dynamic-color, #10b981); color: #000; border-color: #000; cursor: pointer; box-shadow: 0 0 20px var(--dynamic-color, rgba(16, 185, 129, 0.4)); }
+        .table-node.occupied .chair { background: var(--dynamic-color, #10b981); border-color: #000; }
         .table-node.occupied:hover { z-index: 100; transform: scale(1.05) !important; }
-        
         .guest-name { font-size: 10px; font-weight: bold; white-space: nowrap; margin-top: 2px; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2>Captain's Roster</h2>
-    <div class="subtitle">Format: Name, Guests, Window (Y/N)</div>
-    <textarea id="bookingInput" placeholder="Soren Jensen, 4, Y&#10;Marni Larsen, 2, N"></textarea>
-    <button onclick="executeAllocation()">Launch Protocol</button>
+    <h2>Dining Commander</h2>
+    <div class="subtitle">Format: Name, Guests, Window (Y/N), Time</div>
+    
+    <label>Active Shift View</label>
+    <select id="timeView"></select>
+
+    <label>Paste Bookings</label>
+    <textarea id="bookingInput" placeholder="Soren Jensen, 4, Y, 18:00&#10;Marni Larsen, 2, N, 20:00"></textarea>
+    <button id="runBtn">Allocate Bookings</button>
     <div id="unseated" class="error-log"></div>
 </div>
 
@@ -83,42 +64,44 @@
 </div>
 
 <script>
-    let deck = JSON.parse(localStorage.getItem('skansagadur_manifest_2025')) || [];
-    let allocations = new Map();
+    const deck = JSON.parse(localStorage.getItem('skansagadur_manifest_2025')) || [];
+    const settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { duration: 90, shifts: [{time: '18:00', color:'#10b981'}] };
+    let allocations = new Map(); // Table ID -> { "18:00": guestData, "20:00": guestData }
+
+    const timeSelect = document.getElementById('timeView');
+    settings.shifts.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.time; opt.innerText = `Shift: ${s.time}`;
+        timeSelect.appendChild(opt);
+    });
+
+    timeSelect.addEventListener('change', renderDeck);
 
     function renderDeck() {
         const canvas = document.getElementById('canvas');
         canvas.innerHTML = '';
-
-        if(deck.length === 0) {
-            canvas.innerHTML = "<h3 style='color:#64748b; margin: 50px;'>No deck manifest found. Please build the layout in Architect.</h3>";
-            return;
-        }
+        const activeTime = timeSelect.value;
+        const activeShiftData = settings.shifts.find(s => s.time === activeTime) || { color: '#10b981' };
 
         deck.forEach(t => {
             const node = document.createElement('div');
             node.className = `table-node ${t.win ? 'is-window' : ''}`;
-            node.id = `t-${t.id}`;
-            node.style.left = `${t.x}px`;
-            node.style.top = `${t.y}px`;
+            node.style.left = `${t.x}px`; node.style.top = `${t.y}px`;
             
-            // Mathematical Geometry Renderer (Matches Admin)
             let surfaceW, surfaceH, br, chairsHTML = '';
             if (t.shape === 'square' || t.shape === 'rect') {
                 br = '6px';
-                if (t.seats === 2) { surfaceW = 40; surfaceH = 40; }
-                if (t.seats === 4) { surfaceW = 56; surfaceH = 50; }
-                if (t.seats === 6) { surfaceW = 80; surfaceH = 50; }
+                if (t.seats === 2) { surfaceW = 26; surfaceH = 40; }
+                else if (t.seats === 4) { surfaceW = 56; surfaceH = 50; }
+                else if (t.seats === 6) { surfaceW = 80; surfaceH = 50; }
 
-                const spacing = 22; 
-                const startX = (surfaceW - (t.seats/2 * spacing)) / 2 + 4;
+                const spacing = 22; const startX = (surfaceW - (t.seats/2 * spacing)) / 2 + 4;
                 for(let i=0; i < t.seats/2; i++) {
                     const cx = startX + (i * spacing);
                     chairsHTML += `<div class="chair" style="left:${cx}px; top:-8px;"></div><div class="chair" style="left:${cx}px; bottom:-8px;"></div>`;
                 }
             } else if (t.shape === 'round') {
-                br = '50%';
-                surfaceW = t.seats === 8 ? 70 : (t.seats === 6 ? 60 : 50); surfaceH = surfaceW;
+                br = '50%'; surfaceW = t.seats === 6 ? 60 : 50; surfaceH = surfaceW;
                 const radius = (surfaceW / 2) + 4; const center = (surfaceW / 2) - 7;
                 for(let i=0; i < t.seats; i++) {
                     const angle = (i * (360 / t.seats)) * (Math.PI / 180);
@@ -130,48 +113,48 @@
             node.style.width = `${surfaceW}px`; node.style.height = `${surfaceH}px`;
             node.style.transform = `rotate(${t.rotation || 0}deg)`;
 
-            const guest = allocations.get(t.id);
+            const tableBookings = allocations.get(t.id) || {};
+            const guest = tableBookings[activeTime];
+
             if(guest) {
                 node.classList.add('occupied');
-                node.innerHTML = `
-                    ${chairsHTML}
-                    <div class="surface" style="width:100%; height:100%; border-radius:${br};">
-                        <span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">
-                            ${t.id}<div class="guest-name">${guest.name}</div>
-                        </span>
-                    </div>
-                `;
-                node.title = `Click to re-assign ${guest.name}`;
-                node.onclick = () => manualReassign(t.id);
+                node.style.setProperty('--dynamic-color', activeShiftData.color);
+                node.innerHTML = `${chairsHTML}<div class="surface" style="width:100%; height:100%; border-radius:${br};"><span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">${t.id}<div class="guest-name">${guest.name}</div></span></div>`;
+                node.addEventListener('click', () => manualReassign(t.id, activeTime));
             } else {
-                node.innerHTML = `
-                    ${chairsHTML}
-                    <div class="surface" style="width:100%; height:100%; border-radius:${br};">
-                        <span style="transform: rotate(-${t.rotation || 0}deg);">${t.id}</span>
-                    </div>
-                `;
+                node.innerHTML = `${chairsHTML}<div class="surface" style="width:100%; height:100%; border-radius:${br};"><span style="transform: rotate(-${t.rotation || 0}deg);">${t.id}</span></div>`;
             }
             canvas.appendChild(node);
         });
     }
 
-    function executeAllocation() {
+    document.getElementById('runBtn').addEventListener('click', () => {
         allocations.clear();
-        const text = document.getElementById('bookingInput').value.trim();
-        const guests = text.split('\n').map(l => {
+        const guests = document.getElementById('bookingInput').value.trim().split('\n').map(l => {
             const p = l.split(',');
-            return { name: p[0]?.trim(), size: parseInt(p[1]), win: p[2]?.trim().toUpperCase() === 'Y' };
-        }).filter(g => g.name && !isNaN(g.size));
+            return { name: p[0]?.trim(), size: parseInt(p[1]), win: p[2]?.trim().toUpperCase() === 'Y', time: p[3]?.trim() };
+        }).filter(g => g.name && !isNaN(g.size) && g.time);
 
         guests.sort((a, b) => (b.win - a.win) || (b.size - a.size));
         let failed = [];
 
         guests.forEach(g => {
-            let match = deck.find(t => !allocations.has(t.id) && t.seats >= g.size && (g.win ? t.win : true));
-            if (!match && g.win) match = deck.find(t => !allocations.has(t.id) && t.seats >= g.size);
+            let match = deck.find(t => {
+                const tableBookings = allocations.get(t.id) || {};
+                return !tableBookings[g.time] && t.seats >= g.size && (g.win ? t.win : true);
+            });
 
-            if (match) allocations.set(match.id, g);
-            else failed.push(`${g.name} (${g.size})`);
+            if (!match && g.win) {
+                match = deck.find(t => {
+                    const tableBookings = allocations.get(t.id) || {};
+                    return !tableBookings[g.time] && t.seats >= g.size;
+                });
+            }
+
+            if (match) {
+                if(!allocations.has(match.id)) allocations.set(match.id, {});
+                allocations.get(match.id)[g.time] = g;
+            } else failed.push(`${g.name} (${g.size}pax) @ ${g.time}`);
         });
 
         const errPanel = document.getElementById('unseated');
@@ -181,24 +164,27 @@
         } else errPanel.style.display = 'none';
 
         renderDeck();
-    }
+    });
 
-    function manualReassign(currentId) {
-        const guest = allocations.get(currentId);
-        const newId = prompt(`Override Assignment for ${guest.name}\nEnter New Table ID:`);
+    function manualReassign(currentId, activeTime) {
+        const guest = allocations.get(currentId)[activeTime];
+        const newId = prompt(`Moving ${guest.name} (${activeTime} Shift)\nEnter New Table ID:`);
         if(!newId) return;
 
         const target = deck.find(t => t.id === newId);
         if(!target) return alert(`Table ${newId} does not exist.`);
-        if(allocations.has(newId)) return alert(`Table ${newId} is occupied.`);
-        if(target.seats < guest.size && !confirm(`Overcapacity Warning: Moving ${guest.size} people to a ${target.seats}-seat table. Proceed?`)) return;
+        
+        if(!allocations.has(newId)) allocations.set(newId, {});
+        if(allocations.get(newId)[activeTime]) return alert(`Table ${newId} is already occupied at ${activeTime}.`);
+        
+        if(target.seats < guest.size && !confirm(`Overcapacity Warning: Moving ${guest.size} pax to a ${target.seats}-seat table. Proceed?`)) return;
 
-        allocations.delete(currentId);
-        allocations.set(newId, guest);
+        delete allocations.get(currentId)[activeTime];
+        allocations.get(newId)[activeTime] = guest;
         renderDeck();
     }
 
-    renderDeck();
+    if(settings.shifts.length > 0) renderDeck();
 </script>
 </body>
 </html>
