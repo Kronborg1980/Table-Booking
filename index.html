@@ -2,104 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ship Booking Commander</title>
+    <title>Booking Commander</title>
     <style>
         :root {
-            --glass-bg: rgba(15, 23, 42, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --bg-glass: rgba(15, 23, 42, 0.95);
+            --border-glass: rgba(255, 255, 255, 0.2);
             --accent: #38bdf8;
             --occupied-bg: #10b981;
             --occupied-text: #064e3b;
             --text-main: #f8fafc;
-            --table-color: #e2e8f0;
-            --chair-color: #94a3b8;
+            --table-bg: #e2e8f0;
+            --chair-bg: #94a3b8;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0; height: 100vh; display: flex;
-            background: url('https://www.smyrilline.dk/wp-content/uploads/2025/04/Norrona.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: #1e293b; 
             color: var(--text-main); overflow: hidden;
         }
 
         #sidebar {
-            width: 360px; background: var(--glass-bg); backdrop-filter: blur(20px);
-            border-right: 1px solid var(--glass-border); padding: 30px;
+            width: 340px; background: var(--bg-glass);
+            border-right: 1px solid var(--border-glass); padding: 25px;
             display: flex; flex-direction: column; gap: 15px; z-index: 10;
         }
 
-        h2 { margin: 0; font-size: 22px; font-weight: 300; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        h2 { margin: 0; font-size: 22px; border-bottom: 1px solid var(--border-glass); padding-bottom: 10px; }
 
         textarea {
-            width: 100%; height: 250px; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border); color: #fff; padding: 15px;
+            width: 100%; height: 250px; background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-glass); color: #fff; padding: 15px;
             border-radius: 8px; font-family: monospace; resize: none; box-sizing: border-box; outline: none;
         }
 
-        button {
-            background: var(--accent); color: #0f172a; padding: 15px; border: none;
-            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;
-        }
+        button { background: var(--accent); color: #0f172a; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        .error-log { margin-top: 15px; padding: 15px; background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
+        .error-log { margin-top: 10px; padding: 15px; background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
 
-        #map-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        #map-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #0f172a; }
         
         #canvas {
-            width: 1000px; height: 900px; background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px; position: relative;
+            width: 1000px; height: 850px; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; position: relative;
         }
 
         /* --- VISUAL TABLE SYSTEM --- */
-        .table-wrapper {
-            position: absolute; display: flex; align-items: center; justify-content: center;
-            width: 70px; height: 70px; transition: all 0.3s ease;
-        }
+        .table-wrapper { position: absolute; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; transition: all 0.3s ease; }
 
         .table-core {
-            background: var(--table-color); color: #0f172a; display: flex; flex-direction: column;
+            background: var(--table-bg); color: #0f172a; display: flex; flex-direction: column;
             align-items: center; justify-content: center; font-size: 12px; font-weight: bold;
-            z-index: 2; border: 2px solid #334155; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            text-align: center; line-height: 1.1;
+            z-index: 2; border: 2px solid #334155; text-align: center; line-height: 1.1;
         }
-        
         .is-window .table-core { border-color: var(--accent); }
-
-        .chair { position: absolute; background: var(--chair-color); border: 1px solid #475569; border-radius: 50%; width: 12px; height: 12px; z-index: 1; transition: 0.3s; }
+        .chair { position: absolute; background: var(--chair-bg); border: 1px solid #475569; border-radius: 50%; width: 14px; height: 14px; z-index: 1; transition: 0.3s; }
 
         /* Occupied States */
-        .table-wrapper.occupied .table-core { background: var(--occupied-bg); color: var(--occupied-text); border-color: #047857; cursor: pointer; }
+        .table-wrapper.occupied .table-core { background: var(--occupied-bg); color: var(--occupied-text); border-color: #047857; cursor: pointer; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
         .table-wrapper.occupied .chair { background: var(--occupied-bg); border-color: #047857; }
         .table-wrapper.occupied:hover { transform: scale(1.1); z-index: 50; }
         
-        .guest-name { font-size: 9px; font-weight: normal; overflow: hidden; text-overflow: ellipsis; max-width: 90%; white-space: nowrap; }
+        .guest-name { font-size: 10px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; max-width: 90%; white-space: nowrap; margin-top: 2px; }
 
-        /* Layouts */
-        .layout-square-4 .table-core { width: 36px; height: 36px; border-radius: 4px; }
-        .layout-square-4 .c-top { top: 2px; } .layout-square-4 .c-bot { bottom: 2px; } .layout-square-4 .c-left { left: 2px; } .layout-square-4 .c-right { right: 2px; }
+        /* Layout Positions */
+        .layout-square-4 .table-core { width: 40px; height: 40px; border-radius: 4px; }
+        .layout-square-4 .c-top { top: 0px; } .layout-square-4 .c-bot { bottom: 0px; } .layout-square-4 .c-left { left: 0px; } .layout-square-4 .c-right { right: 0px; }
 
-        .layout-square-2 .table-core { width: 32px; height: 32px; border-radius: 4px; }
-        .layout-square-2 .c-left { left: 4px; } .layout-square-2 .c-right { right: 4px; }
+        .layout-square-2 .table-core { width: 36px; height: 36px; border-radius: 4px; }
+        .layout-square-2 .c-left { left: 2px; } .layout-square-2 .c-right { right: 2px; }
 
-        .layout-circle-6 .table-core { width: 44px; height: 44px; border-radius: 50%; }
-        .layout-circle-6 .c-1 { top: 2px; left: 29px; } .layout-circle-6 .c-2 { top: 15px; right: 0px; } .layout-circle-6 .c-3 { bottom: 2px; left: 29px; }
-        .layout-circle-6 .c-4 { bottom: 2px; right: 29px; } .layout-circle-6 .c-5 { top: 15px; left: 0px; } .layout-circle-6 .c-6 { top: 2px; right: 29px; }
-
-        .layout-circle-4 .table-core { width: 38px; height: 38px; border-radius: 50%; }
-        .layout-circle-4 .c-top { top: 2px; } .layout-circle-4 .c-bot { bottom: 2px; } .layout-circle-4 .c-left { left: 2px; } .layout-circle-4 .c-right { right: 2px; }
-
-        .layout-rect-v-4 .table-core { width: 30px; height: 50px; border-radius: 4px; }
-        .layout-rect-v-4 .c-l1 { left: 4px; top: 12px; } .layout-rect-v-4 .c-l2 { left: 4px; bottom: 12px; }
-        .layout-rect-v-4 .c-r1 { right: 4px; top: 12px; } .layout-rect-v-4 .c-r2 { right: 4px; bottom: 12px; }
+        .layout-circle-6 .table-core { width: 46px; height: 46px; border-radius: 50%; }
+        .layout-circle-6 .c-1 { top: 0px; left: 28px; } .layout-circle-6 .c-2 { top: 14px; right: -2px; } .layout-circle-6 .c-3 { bottom: 0px; left: 28px; }
+        .layout-circle-6 .c-4 { bottom: 0px; right: 28px; } .layout-circle-6 .c-5 { top: 14px; left: -2px; } .layout-circle-6 .c-6 { top: 0px; right: 28px; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2>Dining Roster</h2>
+    <h2>Captain's Roster</h2>
     <p style="font-size: 12px; color: #cbd5e1; margin: 0;">Format: <strong>Name, Party Size, Window (Y/N)</strong></p>
     <textarea id="bookingInput" placeholder="Soren Jensen, 4, Y&#10;Marni Larsen, 2, N"></textarea>
     <button onclick="executeSeating()">Allocate Tables</button>
@@ -111,20 +92,20 @@
 </div>
 
 <script>
-    let layout = JSON.parse(localStorage.getItem('shipDeckVisualMap')) || [];
+    // Changed local storage key to match the new admin.html
+    let layout = JSON.parse(localStorage.getItem('shipDataMap2025')) || [];
     let activeAllocations = new Map();
 
     function initDeck() {
         const canvas = document.getElementById('canvas');
         canvas.innerHTML = '';
 
-        layout.forEach(t => {
-            // Re-calculate capacity based on layout to ensure logic is safe
-            let cap = 4;
-            if(t.layout === 'square-2') cap = 2;
-            if(t.layout === 'circle-6') cap = 6;
-            t.cap = cap;
+        if(layout.length === 0) {
+            canvas.innerHTML = "<h3 style='color:white; text-align:center; margin-top:200px;'>No tables found. Please build layout in admin.html</h3>";
+            return;
+        }
 
+        layout.forEach(t => {
             const wrapper = document.createElement('div');
             wrapper.className = `table-wrapper layout-${t.layout} ${t.win ? 'is-window' : ''}`;
             wrapper.id = `table-${t.id}`;
@@ -132,18 +113,18 @@
             wrapper.style.top = t.y + 'px';
             
             let chairHTML = '';
-            if(t.layout === 'square-4' || t.layout === 'circle-4') chairHTML = `<div class="chair c-top"></div><div class="chair c-bot"></div><div class="chair c-left"></div><div class="chair c-right"></div>`;
+            if(t.layout === 'square-4') chairHTML = `<div class="chair c-top"></div><div class="chair c-bot"></div><div class="chair c-left"></div><div class="chair c-right"></div>`;
             else if (t.layout === 'square-2') chairHTML = `<div class="chair c-left"></div><div class="chair c-right"></div>`;
             else if (t.layout === 'circle-6') chairHTML = `<div class="chair c-1"></div><div class="chair c-2"></div><div class="chair c-3"></div><div class="chair c-4"></div><div class="chair c-5"></div><div class="chair c-6"></div>`;
-            else if (t.layout === 'rect-v-4') chairHTML = `<div class="chair c-l1"></div><div class="chair c-l2"></div><div class="chair c-r1"></div><div class="chair c-r2"></div>`;
 
             const booking = activeAllocations.get(t.id);
             if(booking) {
                 wrapper.classList.add('occupied');
-                wrapper.innerHTML = `${chairHTML}<div class="table-core">${t.id}<br><span class="guest-name">${booking.name}</span></div>`;
+                wrapper.innerHTML = `${chairHTML}<div class="table-core">${t.id}<div class="guest-name">${booking.name}</div></div>`;
+                wrapper.title = `Click to re-assign ${booking.name}`;
                 wrapper.onclick = () => manualReassign(t.id);
             } else {
-                wrapper.innerHTML = `${chairHTML}<div class="table-core">${t.id}</div>`;
+                wrapper.innerHTML = `${chairHTML}<div class="table-core">${t.id}<br><span style="font-size:9px; font-weight:normal; opacity:0.7">${t.cap} empty</span></div>`;
             }
             canvas.appendChild(wrapper);
         });
@@ -162,6 +143,7 @@
         let failedToSeat = [];
 
         guests.forEach(guest => {
+            // Because t.cap is explicitly hardcoded in the layout now, this logic will perfectly find the right sizes.
             let match = layout.find(t => !activeAllocations.has(t.id) && t.cap >= guest.size && (guest.winReq ? t.win : true));
             if (!match && guest.winReq) match = layout.find(t => !activeAllocations.has(t.id) && t.cap >= guest.size);
 
@@ -172,7 +154,7 @@
         const errorPanel = document.getElementById('unseated');
         if (failedToSeat.length > 0) {
             errorPanel.style.display = 'block';
-            errorPanel.innerHTML = `<strong>Attention:</strong> Could not seat:<br>• ` + failedToSeat.join('<br>• ');
+            errorPanel.innerHTML = `<strong>Requires Attention:</strong><br>Could not seat:<br>• ` + failedToSeat.join('<br>• ');
         } else {
             errorPanel.style.display = 'none';
         }
@@ -181,12 +163,16 @@
 
     function manualReassign(currentTableId) {
         const guestData = activeAllocations.get(currentTableId);
-        const newTarget = prompt(`Re-assign ${guestData.name}\nEnter new Table ID:`);
+        const newTarget = prompt(`Moving ${guestData.name} (Party of ${guestData.size})\nEnter new Table ID Number:`);
         if (!newTarget) return;
 
         const tableProfile = layout.find(t => t.id === newTarget);
-        if (!tableProfile) return alert(`Table ${newTarget} does not exist.`);
-        if (activeAllocations.has(newTarget)) return alert(`Table is occupied.`);
+        if (!tableProfile) return alert(`Table ${newTarget} does not exist on map.`);
+        if (activeAllocations.has(newTarget)) return alert(`Table is already occupied.`);
+
+        if (tableProfile.cap < guestData.size) {
+            if(!confirm(`Warning: Overcapacity! Moving ${guestData.size} guests to a ${tableProfile.cap}-seat table. Proceed?`)) return;
+        }
 
         activeAllocations.delete(currentTableId);
         activeAllocations.set(newTarget, guestData);
