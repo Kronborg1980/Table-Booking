@@ -2,160 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ship Layout Architect</title>
+    <title>Deck Architect</title>
     <style>
         :root {
-            --glass-bg: rgba(15, 23, 42, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --bg-glass: rgba(15, 23, 42, 0.9);
+            --border-glass: rgba(255, 255, 255, 0.2);
             --accent: #38bdf8;
             --danger: #ef4444;
             --success: #10b981;
-            --text-main: #f8fafc;
-            --table-color: #e2e8f0;
-            --chair-color: #94a3b8;
+            --table-bg: #e2e8f0;
+            --chair-bg: #94a3b8;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            background: url('https://www.smyrilline.dk/wp-content/uploads/2025/04/Norrona.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: var(--text-main);
-            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0; height: 100vh; display: flex;
+            background: #1e293b; /* Solid dark background for reliability */
+            color: #f8fafc; overflow: hidden;
         }
 
         #sidebar {
-            width: 340px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            border-right: 1px solid var(--glass-border);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.5);
-            overflow-y: auto;
+            width: 320px; background: var(--bg-glass);
+            border-right: 1px solid var(--border-glass); padding: 25px;
+            display: flex; flex-direction: column; gap: 15px; z-index: 10;
         }
 
-        h2 { margin: 0 0 10px 0; font-size: 22px; font-weight: 300; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        h2 { margin: 0; font-size: 20px; border-bottom: 1px solid var(--border-glass); padding-bottom: 10px; }
 
         .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; }
-        
-        input, select {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-        }
+        label { font-size: 11px; text-transform: uppercase; color: #cbd5e1; }
+        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--border-glass); color: white; padding: 10px; border-radius: 6px; }
         option { background: #0f172a; color: white; }
 
-        button {
-            padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
-            transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;
-            margin-top: 5px;
-        }
+        button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; margin-top: 5px; }
         .btn-primary { background: var(--accent); color: #0f172a; }
-        .btn-primary:hover { background: #7dd3fc; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
 
-        #canvas-wrapper { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+        #canvas-wrapper { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #0f172a; }
         
         #canvas {
-            width: 1000px; height: 900px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 15px;
-            position: relative;
-            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
+            width: 1000px; height: 850px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; position: relative;
+            background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 20px 20px;
         }
 
-        /* --- VISUAL TABLE SYSTEM --- */
-        .table-wrapper {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            width: 70px;
-            height: 70px;
-            user-select: none;
-            transition: transform 0.1s;
-        }
+        /* Table & Chair CSS */
+        .table-wrapper { position: absolute; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; cursor: grab; user-select: none; }
         .table-wrapper:active { cursor: grabbing; z-index: 100; transform: scale(1.05); }
 
         .table-core {
-            background: var(--table-color);
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            z-index: 2;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid #334155;
+            background: var(--table-bg); color: #0f172a; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; font-size: 12px; font-weight: bold;
+            z-index: 2; border: 2px solid #334155; text-align: center; line-height: 1.2;
         }
-        
         .is-window .table-core { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-        .chair {
-            position: absolute;
-            background: var(--chair-color);
-            border: 1px solid #475569;
-            border-radius: 50%;
-            width: 12px;
-            height: 12px;
-            z-index: 1;
-        }
+        .chair { position: absolute; background: var(--chair-bg); border: 1px solid #475569; border-radius: 50%; width: 14px; height: 14px; z-index: 1; }
 
-        /* Specific Shapes based on map */
-        .layout-square-4 .table-core { width: 36px; height: 36px; border-radius: 4px; }
-        .layout-square-4 .c-top { top: 2px; }
-        .layout-square-4 .c-bot { bottom: 2px; }
-        .layout-square-4 .c-left { left: 2px; }
-        .layout-square-4 .c-right { right: 2px; }
+        .layout-square-4 .table-core { width: 40px; height: 40px; border-radius: 4px; }
+        .layout-square-4 .c-top { top: 0px; } .layout-square-4 .c-bot { bottom: 0px; } .layout-square-4 .c-left { left: 0px; } .layout-square-4 .c-right { right: 0px; }
 
-        .layout-square-2 .table-core { width: 32px; height: 32px; border-radius: 4px; }
-        .layout-square-2 .c-left { left: 4px; }
-        .layout-square-2 .c-right { right: 4px; }
+        .layout-square-2 .table-core { width: 36px; height: 36px; border-radius: 4px; }
+        .layout-square-2 .c-left { left: 2px; } .layout-square-2 .c-right { right: 2px; }
 
-        .layout-circle-6 .table-core { width: 44px; height: 44px; border-radius: 50%; }
-        .layout-circle-6 .c-1 { top: 2px; left: 29px; }
-        .layout-circle-6 .c-2 { top: 15px; right: 0px; }
-        .layout-circle-6 .c-3 { bottom: 2px; left: 29px; }
-        .layout-circle-6 .c-4 { bottom: 2px; right: 29px; }
-        .layout-circle-6 .c-5 { top: 15px; left: 0px; }
-        .layout-circle-6 .c-6 { top: 2px; right: 29px; }
+        .layout-circle-6 .table-core { width: 46px; height: 46px; border-radius: 50%; }
+        .layout-circle-6 .c-1 { top: 0px; left: 28px; } .layout-circle-6 .c-2 { top: 14px; right: -2px; } .layout-circle-6 .c-3 { bottom: 0px; left: 28px; }
+        .layout-circle-6 .c-4 { bottom: 0px; right: 28px; } .layout-circle-6 .c-5 { top: 14px; left: -2px; } .layout-circle-6 .c-6 { top: 0px; right: 28px; }
 
-        .layout-circle-4 .table-core { width: 38px; height: 38px; border-radius: 50%; }
-        .layout-circle-4 .c-top { top: 2px; }
-        .layout-circle-4 .c-bot { bottom: 2px; }
-        .layout-circle-4 .c-left { left: 2px; }
-        .layout-circle-4 .c-right { right: 2px; }
-
-        .layout-rect-v-4 .table-core { width: 30px; height: 50px; border-radius: 4px; }
-        .layout-rect-v-4 .c-l1 { left: 4px; top: 12px; }
-        .layout-rect-v-4 .c-l2 { left: 4px; bottom: 12px; }
-        .layout-rect-v-4 .c-r1 { right: 4px; top: 12px; }
-        .layout-rect-v-4 .c-r2 { right: 4px; bottom: 12px; }
-
-        .delete-btn {
-            position: absolute; top: 0; right: 0;
-            background: var(--danger); color: white; border-radius: 50%;
-            width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
-            font-size: 10px; cursor: pointer; opacity: 0; transition: 0.2s; z-index: 10;
-        }
+        .delete-btn { position: absolute; top: 0; right: 0; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; opacity: 0; z-index: 10; }
         .table-wrapper:hover .delete-btn { opacity: 1; }
     </style>
 </head>
@@ -165,33 +80,31 @@
     <h2>Deck Architect</h2>
     
     <div class="input-group">
-        <label>Table ID</label>
+        <label>Table ID Number</label>
         <input type="text" id="t-id" placeholder="e.g. 60">
     </div>
 
     <div class="input-group">
-        <label>Visual Layout & Chairs</label>
+        <label>Table Shape & Chairs</label>
         <select id="t-layout">
-            <option value="square-4">Square (4 Chairs)</option>
-            <option value="square-2">Square (2 Chairs)</option>
-            <option value="circle-6">Round (6 Chairs)</option>
-            <option value="circle-4">Round (4 Chairs)</option>
-            <option value="rect-v-4">Rectangle Vert (4 Chairs)</option>
+            <option value="square-4">Square (4 Seats)</option>
+            <option value="square-2">Square (2 Seats)</option>
+            <option value="circle-6">Round (6 Seats)</option>
         </select>
     </div>
 
     <div class="input-group">
-        <label>Window Priority Table?</label>
+        <label>Window Priority?</label>
         <select id="t-win">
             <option value="false">No</option>
             <option value="true">Yes</option>
         </select>
     </div>
 
-    <button class="btn-primary" onclick="addTable()">+ Add to Map</button>
-    <div style="height: 1px; background: var(--glass-border); margin: 5px 0;"></div>
-    <button class="btn-success" onclick="saveLayout()">💾 Save Configuration</button>
-    <button class="btn-danger" onclick="clearLayout()">⚠️ Clear Deck</button>
+    <button class="btn-primary" onclick="addTable()">+ Add Table</button>
+    <div style="height: 1px; background: var(--border-glass); margin: 10px 0;"></div>
+    <button class="btn-success" onclick="saveLayout()">💾 Save Map</button>
+    <button class="btn-danger" onclick="clearLayout()">⚠️ Clear Map</button>
 </div>
 
 <div id="canvas-wrapper">
@@ -199,7 +112,7 @@
 </div>
 
 <script>
-    let layout = JSON.parse(localStorage.getItem('shipDeckVisualMap')) || [];
+    let layout = JSON.parse(localStorage.getItem('shipDataMap2025')) || [];
     const canvas = document.getElementById('canvas');
     let isDragging = false, currentElement = null, offsetX = 0, offsetY = 0;
 
@@ -213,24 +126,16 @@
             wrapper.style.top = t.y + 'px';
             
             let chairHTML = '';
-            // Generate chairs based on layout
-            if(t.layout === 'square-4' || t.layout === 'circle-4') {
-                chairHTML = `<div class="chair c-top"></div><div class="chair c-bot"></div><div class="chair c-left"></div><div class="chair c-right"></div>`;
-                t.cap = 4;
-            } else if (t.layout === 'square-2') {
-                chairHTML = `<div class="chair c-left"></div><div class="chair c-right"></div>`;
-                t.cap = 2;
-            } else if (t.layout === 'circle-6') {
-                chairHTML = `<div class="chair c-1"></div><div class="chair c-2"></div><div class="chair c-3"></div><div class="chair c-4"></div><div class="chair c-5"></div><div class="chair c-6"></div>`;
-                t.cap = 6;
-            } else if (t.layout === 'rect-v-4') {
-                chairHTML = `<div class="chair c-l1"></div><div class="chair c-l2"></div><div class="chair c-r1"></div><div class="chair c-r2"></div>`;
-                t.cap = 4;
-            }
+            if(t.layout === 'square-4') chairHTML = `<div class="chair c-top"></div><div class="chair c-bot"></div><div class="chair c-left"></div><div class="chair c-right"></div>`;
+            else if (t.layout === 'square-2') chairHTML = `<div class="chair c-left"></div><div class="chair c-right"></div>`;
+            else if (t.layout === 'circle-6') chairHTML = `<div class="chair c-1"></div><div class="chair c-2"></div><div class="chair c-3"></div><div class="chair c-4"></div><div class="chair c-5"></div><div class="chair c-6"></div>`;
 
             wrapper.innerHTML = `
                 ${chairHTML}
-                <div class="table-core">${t.id}</div>
+                <div class="table-core">
+                    ${t.id}<br>
+                    <span style="font-size: 9px; opacity: 0.8; font-weight: normal;">${t.cap} Seats</span>
+                </div>
                 <div class="delete-btn" onclick="deleteTable('${t.id}')">✕</div>
             `;
             wrapper.addEventListener('mousedown', dragStart);
@@ -243,10 +148,15 @@
         const layoutType = document.getElementById('t-layout').value;
         const win = document.getElementById('t-win').value === 'true';
 
-        if (!id) return alert("Table ID required.");
+        if (!id) return alert("Please enter a Table ID.");
         if (layout.find(t => t.id === id)) return alert("Table ID already exists.");
 
-        layout.push({ id, layout: layoutType, win, x: 400, y: 350 });
+        // Explicitly extract the exact capacity from the layout selection
+        let capacity = 4;
+        if(layoutType === 'square-2') capacity = 2;
+        if(layoutType === 'circle-6') capacity = 6;
+
+        layout.push({ id: id, layout: layoutType, cap: capacity, win: win, x: 450, y: 400 });
         renderLayout();
     }
 
@@ -256,18 +166,19 @@
     }
 
     function saveLayout() {
-        localStorage.setItem('shipDeckVisualMap', JSON.stringify(layout));
-        alert("Deck configuration saved securely!");
+        localStorage.setItem('shipDataMap2025', JSON.stringify(layout));
+        alert("Success! Layout saved. Open index.html to assign guests.");
     }
 
     function clearLayout() {
-        if(confirm("Are you sure you want to clear the entire map?")) {
+        if(confirm("Are you sure? This deletes all tables.")) {
             layout = [];
-            localStorage.removeItem('shipDeckVisualMap');
+            localStorage.removeItem('shipDataMap2025');
             renderLayout();
         }
     }
 
+    // Drag Logic
     function dragStart(e) {
         if(e.target.classList.contains('delete-btn')) return;
         isDragging = true;
