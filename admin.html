@@ -79,15 +79,11 @@
     <h2>Fleet Architect</h2>
     
     <!-- Timeline Settings -->
-    <h3>Dining Shifts</h3>
+    <h3>Time Slots & Colors</h3>
     <div class="control-group flex-row">
-        <input type="time" id="s-time" value="18:00">
-        <input type="color" id="s-color" value="#10b981">
+        <input type="time" id="s-time" value="18:30">
+        <input type="color" id="s-color" value="#0ea5e9">
         <button class="btn-add" style="margin:0; width:auto; padding: 0 15px;" id="addShiftBtn">+</button>
-    </div>
-    <div class="control-group">
-        <label>Turnaround Time (Minutes)</label>
-        <input type="number" id="s-duration" value="90">
     </div>
     <div id="shift-list" style="margin-bottom: 20px;"></div>
 
@@ -130,9 +126,8 @@
 </div>
 
 <script>
-    // Pure Vanilla JS without inline HTML event handlers to pass strict linters
     let deck = JSON.parse(localStorage.getItem('skansagadur_manifest_2025')) || [];
-    let settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { duration: 90, shifts: [] };
+    let settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { shifts: [] };
     
     const canvas = document.getElementById('canvas');
     const shiftList = document.getElementById('shift-list');
@@ -170,7 +165,7 @@
             if (t.shape === 'square' || t.shape === 'rect') {
                 br = '6px';
                 if (t.seats === 2) { 
-                    surfaceW = 26; surfaceH = 40; // Extremely narrow for 2-person
+                    surfaceW = 26; surfaceH = 40; 
                 } else if (t.seats === 4) { 
                     surfaceW = 56; surfaceH = 50; 
                 } else if (t.seats === 6) { 
@@ -263,7 +258,6 @@
     });
 
     document.getElementById('saveBtn').addEventListener('click', () => {
-        settings.duration = parseInt(document.getElementById('s-duration').value);
         localStorage.setItem('skansagadur_manifest_2025', JSON.stringify(deck));
         localStorage.setItem('skansagadur_settings_2025', JSON.stringify(settings));
         alert("Manifest and Settings Saved!");
@@ -277,20 +271,28 @@
         }
     });
 
-    // Dragging Logic
+    // Rock-Solid Dragging Logic
     function startDrag(e) {
-        if(e.target.tagName === 'BUTTON') return;
+        if (e.target.closest('.node-menu') || e.target.tagName === 'BUTTON') return;
         dragObj = e.currentTarget;
-        const workspace = document.getElementById('workspace');
-        offsetX = e.clientX - dragObj.getBoundingClientRect().left + workspace.scrollLeft;
-        offsetY = e.clientY - dragObj.getBoundingClientRect().top + workspace.scrollTop;
+        
+        // Math calculating exact mouse grab position inside the element
+        const rect = dragObj.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
     }
 
     document.addEventListener('mousemove', (e) => {
-        if(dragObj) {
-            const workspace = document.getElementById('workspace');
-            let newX = Math.round((e.clientX - offsetX + workspace.scrollLeft) / 10) * 10;
-            let newY = Math.round((e.clientY - offsetY + workspace.scrollTop) / 10) * 10;
+        if (dragObj) {
+            // Get mouse position relative to the scrolling canvas container
+            const canvasRect = canvas.getBoundingClientRect();
+            let mouseX = e.clientX - canvasRect.left;
+            let mouseY = e.clientY - canvasRect.top;
+            
+            // Subtract grab offset and snap to 10px grid
+            let newX = Math.round((mouseX - offsetX) / 10) * 10;
+            let newY = Math.round((mouseY - offsetY) / 10) * 10;
+
             dragObj.style.left = `${newX}px`;
             dragObj.style.top = `${newY}px`;
         }
@@ -305,7 +307,6 @@
         }
     });
 
-    document.getElementById('s-duration').value = settings.duration;
     renderShifts();
     renderDeck();
 </script>
