@@ -65,16 +65,24 @@
         
         .guest-name { font-size: 10px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; max-width: 90%; white-space: nowrap; margin-top: 2px; }
 
-        /* Layout Positions */
+        /* Fixed Geometry for Layouts */
         .layout-square-4 .table-core { width: 40px; height: 40px; border-radius: 4px; }
-        .layout-square-4 .c-top { top: 0px; } .layout-square-4 .c-bot { bottom: 0px; } .layout-square-4 .c-left { left: 0px; } .layout-square-4 .c-right { right: 0px; }
+        .layout-square-4 .c-top { top: 2px; left: 28px; } 
+        .layout-square-4 .c-bot { bottom: 2px; left: 28px; } 
+        .layout-square-4 .c-left { left: 2px; top: 28px; } 
+        .layout-square-4 .c-right { right: 2px; top: 28px; }
 
         .layout-square-2 .table-core { width: 36px; height: 36px; border-radius: 4px; }
-        .layout-square-2 .c-left { left: 2px; } .layout-square-2 .c-right { right: 2px; }
+        .layout-square-2 .c-left { left: 4px; top: 28px; } 
+        .layout-square-2 .c-right { right: 4px; top: 28px; }
 
         .layout-circle-6 .table-core { width: 46px; height: 46px; border-radius: 50%; }
-        .layout-circle-6 .c-1 { top: 0px; left: 28px; } .layout-circle-6 .c-2 { top: 14px; right: -2px; } .layout-circle-6 .c-3 { bottom: 0px; left: 28px; }
-        .layout-circle-6 .c-4 { bottom: 0px; right: 28px; } .layout-circle-6 .c-5 { top: 14px; left: -2px; } .layout-circle-6 .c-6 { top: 0px; right: 28px; }
+        .layout-circle-6 .c-1 { top: 6px; left: 14px; } 
+        .layout-circle-6 .c-2 { top: 6px; right: 14px; } 
+        .layout-circle-6 .c-3 { top: 28px; left: 0px; }
+        .layout-circle-6 .c-4 { top: 28px; right: 0px; } 
+        .layout-circle-6 .c-5 { bottom: 6px; left: 14px; } 
+        .layout-circle-6 .c-6 { bottom: 6px; right: 14px; }
     </style>
 </head>
 <body>
@@ -92,7 +100,6 @@
 </div>
 
 <script>
-    // Changed local storage key to match the new admin.html
     let layout = JSON.parse(localStorage.getItem('shipDataMap2025')) || [];
     let activeAllocations = new Map();
 
@@ -143,7 +150,6 @@
         let failedToSeat = [];
 
         guests.forEach(guest => {
-            // Because t.cap is explicitly hardcoded in the layout now, this logic will perfectly find the right sizes.
             let match = layout.find(t => !activeAllocations.has(t.id) && t.cap >= guest.size && (guest.winReq ? t.win : true));
             if (!match && guest.winReq) match = layout.find(t => !activeAllocations.has(t.id) && t.cap >= guest.size);
 
