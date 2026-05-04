@@ -37,7 +37,7 @@
         .is-window .surface { border-color: var(--accent); }
         .chair { position: absolute; background: var(--chair); border: 1px solid #334155; border-radius: 50%; width: 14px; height: 14px; z-index: 5; transition: 0.3s; }
 
-        /* Dynamic Occupied Class */
+        /* Dynamic Occupied Class using CSS Variables */
         .table-node.occupied .surface { background: var(--dynamic-color, #10b981); color: #000; border-color: #000; cursor: pointer; box-shadow: 0 0 20px var(--dynamic-color, rgba(16, 185, 129, 0.4)); }
         .table-node.occupied .chair { background: var(--dynamic-color, #10b981); border-color: #000; }
         .table-node.occupied:hover { z-index: 100; transform: scale(1.05) !important; }
@@ -65,8 +65,8 @@
 
 <script>
     const deck = JSON.parse(localStorage.getItem('skansagadur_manifest_2025')) || [];
-    const settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { duration: 90, shifts: [{time: '18:00', color:'#10b981'}] };
-    let allocations = new Map(); // Table ID -> { "18:00": guestData, "20:00": guestData }
+    const settings = JSON.parse(localStorage.getItem('skansagadur_settings_2025')) || { shifts: [] };
+    let allocations = new Map();
 
     const timeSelect = document.getElementById('timeView');
     settings.shifts.forEach(s => {
@@ -77,11 +77,21 @@
 
     timeSelect.addEventListener('change', renderDeck);
 
+    function getShiftColor(timeString) {
+        const shift = settings.shifts.find(s => s.time === timeString);
+        return shift ? shift.color : '#10b981'; // Defaults to green if time doesn't exist
+    }
+
     function renderDeck() {
         const canvas = document.getElementById('canvas');
         canvas.innerHTML = '';
+        
+        if(deck.length === 0) {
+            canvas.innerHTML = "<h3 style='color:#64748b; padding: 40px;'>No layout found. Use the Admin to build the deck.</h3>";
+            return;
+        }
+
         const activeTime = timeSelect.value;
-        const activeShiftData = settings.shifts.find(s => s.time === activeTime) || { color: '#10b981' };
 
         deck.forEach(t => {
             const node = document.createElement('div');
@@ -118,7 +128,10 @@
 
             if(guest) {
                 node.classList.add('occupied');
-                node.style.setProperty('--dynamic-color', activeShiftData.color);
+                
+                // Matches the guest's booking time to the Admin color slot
+                node.style.setProperty('--dynamic-color', getShiftColor(guest.time));
+                
                 node.innerHTML = `${chairsHTML}<div class="surface" style="width:100%; height:100%; border-radius:${br};"><span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">${t.id}<div class="guest-name">${guest.name}</div></span></div>`;
                 node.addEventListener('click', () => manualReassign(t.id, activeTime));
             } else {
