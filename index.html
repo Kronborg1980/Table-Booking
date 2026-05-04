@@ -2,175 +2,156 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bordplan Skansagadur 2025</title>
+    <title>Ship Dining Allocator</title>
     <style>
-        :root {
-            --ship-bg: #ffffff;
-            --kitchen-bg: #333333;
-            --table-border: #555;
-            --occupied: #ff4d4d;
-            --available: #ffffff;
-            --window-blue: #00a8ff;
-        }
-        body { font-family: Arial, sans-serif; display: flex; margin: 0; background: #e0e0e0; height: 100vh; }
+        body { font-family: sans-serif; display: flex; margin: 0; height: 100vh; background: #f0f2f5; }
         
-        /* Control Panel */
-        #controls { width: 320px; background: #222; color: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.3); z-index: 10; }
-        textarea { width: 100%; height: 200px; margin: 10px 0; border-radius: 4px; font-family: monospace; }
+        /* Sidebar */
+        #sidebar { width: 350px; background: white; padding: 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        textarea { width: 100%; height: 200px; padding: 10px; box-sizing: border-box; font-family: monospace; }
+        button { background: #004a99; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #003366; }
+        .error { color: #d9534f; font-size: 14px; font-weight: bold; }
+
+        /* Map Area */
+        #map-area { flex-grow: 1; overflow: auto; padding: 40px; position: relative; }
         
-        /* Map Container */
-        #map-container { flex-grow: 1; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 40px; }
-        #ship-floor { 
-            position: relative; 
-            width: 850px; 
-            height: 1100px; 
-            background: var(--ship-bg); 
-            border: 2px solid #000;
-        }
-
-        /* Large Static Areas */
-        .block { position: absolute; background: #333; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .kitchen { top: 280px; left: 250px; width: 420px; height: 450px; }
-        .bar { top: 550px; left: 180px; width: 80px; height: 120px; clip-path: polygon(0 0, 100% 40%, 100% 100%, 0% 100%); }
-        .stairway { width: 140px; height: 110px; }
-
-        /* Table Styling */
-        .table {
-            position: absolute; border: 1px solid var(--table-border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; cursor: pointer; transition: 0.2s;
-            background: var(--available);
-        }
-        .table:hover { transform: scale(1.1); z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .table.occupied { background: var(--occupied); color: white; }
-        .table.circle { border-radius: 50%; width: 45px; height: 45px; }
-        .table.square { width: 30px; height: 30px; }
-        .table.rect-v { width: 30px; height: 45px; }
-        .table.rect-h { width: 45px; height: 30px; }
-        .table.window-left { border-left: 3px solid var(--window-blue); }
-        .table.window-top { border-top: 3px solid var(--window-blue); }
-        .table.window-right { border-right: 3px solid var(--window-blue); }
-
-        button { width: 100%; padding: 12px; cursor: pointer; background: #2ecc71; color: white; border: none; font-weight: bold; }
+        /* Table Styles (Matching Admin) */
+        .table { position: absolute; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; text-align: center; flex-direction: column; transition: 0.2s; background: #e2e3e5; width: 50px; height: 50px; }
+        .window { border: 3px solid #00a8ff; }
+        .table.occupied { background: #d1e7dd; border-color: #0f5132; color: #0f5132; cursor: pointer; }
+        .table.occupied:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
-<div id="controls">
-    <h3>Booking System</h3>
-    <p><small>Format: Name, Size, Window(Y/N)</small></p>
-    <textarea id="bookingData" placeholder="Jensen, 4, Y&#10;Larsen, 2, N"></textarea>
-    <button onclick="runAllocation()">Auto-Seat Guests</button>
-    <div id="log" style="margin-top: 15px; font-size: 12px; color: #aaa;"></div>
+<div id="sidebar">
+    <h2>Restaurant Bookings</h2>
+    <p style="font-size: 14px; color: #666;">Format: <strong>Name, Guests, Window (Y/N)</strong><br>Example: <i>John Doe, 4, Y</i></p>
+    <textarea id="bookingInput" placeholder="Soren, 4, Y&#10;Marni, 2, N"></textarea>
+    <button onclick="allocateTables()">Allocate Tables</button>
+    <div id="unseated" class="error"></div>
 </div>
 
-<div id="map-container">
-    <div id="ship-floor">
-        <!-- Static Blocks -->
-        <div class="block stairway" style="top: 20px; left: 60px;">STAIRWAYS</div>
-        <div class="block stairway" style="top: 20px; right: 60px;">STAIRWAYS</div>
-        <div class="block kitchen">KITCHEN</div>
-        <div class="block bar">BAR</div>
-
-        <!-- Tables will be injected here by JS -->
-    </div>
+<div id="map-area">
+    <!-- Tables inject here -->
 </div>
 
 <script>
-    // Coordination mapping based on the image provided
-    const tableManifest = [
-        // Top Row Window (60-90)
-        { id: 60, x: 210, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 61, x: 260, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 66, x: 310, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 67, x: 360, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 74, x: 410, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 75, x: 460, y: 20, type: 'square', cap: 2, win: 'top' },
-        { id: 82, x: 510, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 83, x: 560, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 88, x: 610, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 89, x: 660, y: 20, type: 'square', cap: 4, win: 'top' },
-        { id: 90, x: 710, y: 20, type: 'square', cap: 4, win: 'top' },
+    // Load layout saved from admin.html
+    let layout = JSON.parse(localStorage.getItem('shipLayout')) || [];
+    let allocations = new Map();
 
-        // Left Row Window (55-12)
-        { id: 55, x: 55, y: 150, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 54, x: 55, y: 200, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 47, x: 55, y: 250, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 38, x: 55, y: 350, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 34, x: 55, y: 420, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 25, x: 55, y: 650, type: 'rect-h', cap: 2, win: 'left' },
-        { id: 13, x: 55, y: 850, type: 'rect-h', cap: 2, win: 'left' },
-
-        // Center Groups (Diagonal clusters 62-85)
-        { id: 62, x: 260, y: 60, type: 'square', cap: 4, win: false },
-        { id: 65, x: 310, y: 60, type: 'square', cap: 4, win: false },
-        { id: 63, x: 260, y: 110, type: 'square', cap: 4, win: false },
-        { id: 64, x: 310, y: 110, type: 'square', cap: 4, win: false },
+    function initMap() {
+        const mapArea = document.getElementById('map-area');
+        mapArea.innerHTML = '';
         
-        // Circular Tables[cite: 1]
-        { id: 87, x: 690, y: 80, type: 'circle', cap: 6, win: false },
-        { id: 86, x: 690, y: 140, type: 'circle', cap: 6, win: false },
-        { id: 94, x: 780, y: 180, type: 'circle', cap: 6, win: false },
+        if(layout.length === 0) {
+            mapArea.innerHTML = "<h3>No map found. Please build one in admin.html first.</h3>";
+            return;
+        }
 
-        // Right Row Window (95-114)[cite: 1]
-        { id: 95, x: 810, y: 150, type: 'rect-h', cap: 2, win: 'right' },
-        { id: 100, x: 810, y: 240, type: 'rect-h', cap: 2, win: 'right' },
-        { id: 114, x: 810, y: 380, type: 'rect-h', cap: 2, win: 'right' }
-    ];
-
-    let activeBookings = new Map();
-
-    function init() {
-        const floor = document.getElementById('ship-floor');
-        tableManifest.forEach(t => {
-            const div = document.createElement('div');
-            div.id = `table-${t.id}`;
-            div.className = `table ${t.type} ${t.win ? 'window-'+t.win : ''}`;
-            div.style.left = t.x + 'px';
-            div.style.top = t.y + 'px';
-            div.innerHTML = t.id;
-            div.onclick = () => alert(`Table ${t.id}\nCapacity: ${t.cap}\nWindow: ${t.win ? 'Yes' : 'No'}`);
-            floor.appendChild(div);
+        layout.forEach(t => {
+            const el = document.createElement('div');
+            el.className = `table ${t.win ? 'window' : ''}`;
+            el.id = `table-${t.id}`;
+            el.style.left = t.x + 'px';
+            el.style.top = t.y + 'px';
+            
+            const booking = allocations.get(t.id);
+            if(booking) {
+                el.classList.add('occupied');
+                el.innerHTML = `${t.id}<br><small>${booking.name}</small>`;
+                el.title = `Click to move ${booking.name}`;
+                el.onclick = () => moveBooking(t.id);
+            } else {
+                el.innerHTML = `${t.id}<br><small>(${t.cap})</small>`;
+            }
+            
+            mapArea.appendChild(el);
         });
     }
 
-    function runAllocation() {
-        // Clear previous
-        activeBookings.clear();
-        document.querySelectorAll('.table').forEach(el => el.classList.remove('occupied'));
+    function allocateTables() {
+        allocations.clear(); // Reset
+        const rawText = document.getElementById('bookingInput').value;
+        const lines = rawText.split('\n').filter(l => l.trim() !== '');
         
-        const lines = document.getElementById('bookingData').value.trim().split('\n');
-        const bookings = lines.map(line => {
+        let bookings = lines.map(line => {
             const parts = line.split(',');
-            return { name: parts[0]?.trim(), size: parseInt(parts[1]), win: parts[2]?.trim().toUpperCase() === 'Y' };
-        }).filter(b => b.name);
+            return {
+                name: parts[0]?.trim(),
+                qty: parseInt(parts[1]),
+                win: parts[2]?.trim().toUpperCase() === 'Y'
+            };
+        }).filter(b => b.name && !isNaN(b.qty));
 
-        // Priority Sort: Windows first, then largest groups
-        bookings.sort((a, b) => (b.win - a.win) || (b.size - a.size));
+        // Priority 1: Window requests. Priority 2: Group size (largest first)
+        bookings.sort((a, b) => (b.win - a.win) || (b.qty - a.qty));
 
-        bookings.forEach(guest => {
-            // Find optimal table
-            let match = tableManifest.find(t => 
-                !activeBookings.has(t.id) && 
-                t.cap >= guest.size && 
-                (guest.win ? t.win !== false : true)
+        let unseatedList = [];
+
+        bookings.forEach(booking => {
+            // Find a table that fits. 
+            // If they want a window, try to find a window table first.
+            let match = layout.find(t => 
+                !allocations.has(t.id) && 
+                t.cap >= booking.qty && 
+                (booking.win ? t.win : true)
             );
 
-            // Fallback: If no window table available, take any table that fits
-            if (!match) {
-                match = tableManifest.find(t => !activeBookings.has(t.id) && t.cap >= guest.size);
+            // Fallback: If no window table, just find ANY table that fits
+            if (!match && booking.win) {
+                match = layout.find(t => !allocations.has(t.id) && t.cap >= booking.qty);
             }
 
             if (match) {
-                activeBookings.set(match.id, guest);
-                const el = document.getElementById(`table-${match.id}`);
-                el.classList.add('occupied');
-                el.innerHTML = `${match.id}<br><span style="font-size:8px">${guest.name}</span>`;
+                allocations.set(match.id, booking);
+            } else {
+                unseatedList.push(booking.name);
             }
         });
+
+        document.getElementById('unseated').innerText = unseatedList.length 
+            ? "Could not seat: " + unseatedList.join(', ') 
+            : "";
+            
+        initMap();
     }
 
-    init();
+    function moveBooking(fromTableId) {
+        const booking = allocations.get(fromTableId);
+        const toTableId = prompt(`Where would you like to move ${booking.name}?\nEnter Table ID:`);
+        
+        if (!toTableId) return;
+
+        // Check if table exists
+        const targetTable = layout.find(t => t.id === toTableId);
+        if (!targetTable) {
+            alert("Table ID does not exist.");
+            return;
+        }
+
+        // Check if table is occupied
+        if (allocations.has(toTableId)) {
+            alert("That table is already occupied!");
+            return;
+        }
+
+        // Check if it fits
+        if (targetTable.cap < booking.qty) {
+            const force = confirm(`Warning: Table ${toTableId} only has ${targetTable.cap} seats, but the group has ${booking.qty} people. Move anyway?`);
+            if(!force) return;
+        }
+
+        // Execute Move
+        allocations.delete(fromTableId);
+        allocations.set(toTableId, booking);
+        initMap();
+    }
+
+    // Initialize
+    initMap();
 </script>
 </body>
 </html>
