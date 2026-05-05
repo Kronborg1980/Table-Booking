@@ -1,45 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skansagadur - Dining Commander</title>
+    <title>Skansagarður - Bordtildeling</title>
     <style>
         :root {
-            --glass-bg: rgba(15, 23, 42, 0.95);
+            /* Smyril Line Brand Colors */
+            --smyril-navy: #002b5c;
+            --smyril-red: #e3000f;
+            --smyril-blue: #0056a3;
+
+            --glass-bg: rgba(0, 43, 92, 0.90);
             --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #0ea5e9;
-            --surface: #e2e8f0;
-            --chair: #64748b;
+            --surface: #ffffff;
+            --chair: #cbd5e1;
             --text: #f8fafc;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; background: #0f172a; color: var(--text); overflow: hidden; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; background: url('https://www.smyrilline.dk/wp-content/uploads/2025/04/Norrona.jpg') center/cover fixed no-repeat; color: var(--text); overflow: hidden; }
 
-        #sidebar { width: 360px; background: var(--glass-bg); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 25px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5); }
-        h2 { margin: 0 0 5px 0; font-size: 24px; font-weight: 300; }
-        .subtitle { font-size: 11px; color: #94a3b8; margin-bottom: 15px; letter-spacing: 1px; }
+        #sidebar { width: 360px; background: var(--glass-bg); backdrop-filter: blur(12px); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 25px; z-index: 50; box-shadow: 5px 0 20px rgba(0,0,0,0.5); }
+        h2 { margin: 0 0 5px 0; font-size: 24px; font-weight: 300; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { font-size: 11px; color: #cbd5e1; margin-bottom: 20px; letter-spacing: 1px; }
 
-        label { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: bold; margin-bottom: 5px; display: block; }
-        select, textarea { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 6px; outline: none; box-sizing: border-box; font-family: inherit; margin-bottom: 15px; }
+        label { font-size: 10px; text-transform: uppercase; color: #cbd5e1; font-weight: bold; margin-bottom: 5px; display: block; }
+        select, textarea { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 4px; outline: none; box-sizing: border-box; font-family: inherit; margin-bottom: 15px; }
+        select:focus, textarea:focus { border-color: var(--smyril-red); background: rgba(255,255,255,0.15); }
+        option { background: var(--smyril-navy); color: white; }
         textarea { height: 250px; font-family: monospace; resize: none; white-space: pre; }
         
-        button { width: 100%; padding: 15px; background: var(--accent); color: #0f172a; border: none; border-radius: 6px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #38bdf8; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
+        button { width: 100%; padding: 15px; background: var(--smyril-red); color: white; border: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #ff1a27; box-shadow: 0 0 10px rgba(227, 0, 15, 0.5); }
 
-        .error-log { padding: 15px; background: rgba(239, 68, 68, 0.15); border-left: 4px solid #ef4444; border-radius: 4px; font-size: 13px; display: none; }
+        .error-log { padding: 15px; background: rgba(227, 0, 15, 0.2); border-left: 4px solid var(--smyril-red); border-radius: 4px; font-size: 13px; display: none; }
 
-        #workspace { flex-grow: 1; overflow: auto; position: relative; }
+        #workspace { flex-grow: 1; overflow: auto; position: relative; background: rgba(0, 43, 92, 0.4); }
         #canvas { width: 2000px; height: 1500px; position: relative; }
 
         .table-node { position: absolute; display: flex; align-items: center; justify-content: center; transform-origin: center center; }
-        .surface { background: var(--surface); color: #0f172a; border: 2px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.3s; }
-        .is-window .surface { border-color: var(--accent); }
-        .chair { position: absolute; background: var(--chair); border: 1px solid #334155; border-radius: 50%; width: 14px; height: 14px; z-index: 5; transition: 0.3s; }
+        .surface { background: var(--surface); color: var(--smyril-navy); border: 2px solid #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; }
+        .is-window .surface { border-color: var(--smyril-blue); }
+        .chair { position: absolute; background: var(--chair); border: 1px solid #94a3b8; border-radius: 50%; width: 14px; height: 14px; z-index: 5; transition: 0.3s; }
 
-        /* Dynamic Occupied Class using CSS Variables */
-        .table-node.occupied .surface { background: var(--dynamic-color, #10b981); color: #000; border-color: #000; cursor: pointer; box-shadow: 0 0 20px var(--dynamic-color, rgba(16, 185, 129, 0.4)); }
-        .table-node.occupied .chair { background: var(--dynamic-color, #10b981); border-color: #000; }
+        /* Dynamic Occupied Class */
+        .table-node.occupied .surface { background: var(--dynamic-color, var(--smyril-blue)); color: #fff; border-color: #fff; cursor: pointer; box-shadow: 0 0 15px var(--dynamic-color, rgba(0, 86, 163, 0.6)); }
+        .table-node.occupied .chair { background: var(--dynamic-color, var(--smyril-blue)); border-color: #fff; }
         .table-node.occupied:hover { z-index: 100; transform: scale(1.05) !important; }
         .guest-name { font-size: 10px; font-weight: bold; white-space: nowrap; margin-top: 2px; }
     </style>
@@ -47,15 +53,15 @@
 <body>
 
 <div id="sidebar">
-    <h2>Dining Commander</h2>
-    <div class="subtitle">Format: Name, Guests, Window (Y/N), Time</div>
+    <h2>Skansagarður</h2>
+    <div class="subtitle">Format: Navn, Antal, Vindue (J/N), Tid</div>
     
-    <label>Active Shift View</label>
+    <label>Vælg Spisetid / Shift</label>
     <select id="timeView"></select>
 
-    <label>Paste Bookings</label>
-    <textarea id="bookingInput" placeholder="Soren Jensen, 4, Y, 18:00&#10;Marni Larsen, 2, N, 20:00"></textarea>
-    <button id="runBtn">Allocate Bookings</button>
+    <label>Indsæt Bookinger</label>
+    <textarea id="bookingInput" placeholder="Søren Jensen, 4, J, 18:00&#10;Marni Larsen, 2, N, 20:00"></textarea>
+    <button id="runBtn">Fordel Borde</button>
     <div id="unseated" class="error-log"></div>
 </div>
 
@@ -71,7 +77,7 @@
     const timeSelect = document.getElementById('timeView');
     settings.shifts.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = s.time; opt.innerText = `Shift: ${s.time}`;
+        opt.value = s.time; opt.innerText = `Spisetid: ${s.time}`;
         timeSelect.appendChild(opt);
     });
 
@@ -79,7 +85,7 @@
 
     function getShiftColor(timeString) {
         const shift = settings.shifts.find(s => s.time === timeString);
-        return shift ? shift.color : '#10b981'; // Defaults to green if time doesn't exist
+        return shift ? shift.color : '#0056a3'; // Fallback til Smyril Blå
     }
 
     function renderDeck() {
@@ -87,7 +93,7 @@
         canvas.innerHTML = '';
         
         if(deck.length === 0) {
-            canvas.innerHTML = "<h3 style='color:#64748b; padding: 40px;'>No layout found. Use the Admin to build the deck.</h3>";
+            canvas.innerHTML = "<h3 style='color:#fff; padding: 40px; text-shadow: 1px 1px 2px #000;'>Ingen bordplan fundet. Brug Admin til at bygge restauranten.</h3>";
             return;
         }
 
@@ -100,7 +106,7 @@
             
             let surfaceW, surfaceH, br, chairsHTML = '';
             if (t.shape === 'square' || t.shape === 'rect') {
-                br = '6px';
+                br = '4px';
                 if (t.seats === 2) { surfaceW = 26; surfaceH = 40; }
                 else if (t.seats === 4) { surfaceW = 56; surfaceH = 50; }
                 else if (t.seats === 6) { surfaceW = 80; surfaceH = 50; }
@@ -128,8 +134,6 @@
 
             if(guest) {
                 node.classList.add('occupied');
-                
-                // Matches the guest's booking time to the Admin color slot
                 node.style.setProperty('--dynamic-color', getShiftColor(guest.time));
                 
                 node.innerHTML = `${chairsHTML}<div class="surface" style="width:100%; height:100%; border-radius:${br};"><span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">${t.id}<div class="guest-name">${guest.name}</div></span></div>`;
@@ -145,7 +149,7 @@
         allocations.clear();
         const guests = document.getElementById('bookingInput').value.trim().split('\n').map(l => {
             const p = l.split(',');
-            return { name: p[0]?.trim(), size: parseInt(p[1]), win: p[2]?.trim().toUpperCase() === 'Y', time: p[3]?.trim() };
+            return { name: p[0]?.trim(), size: parseInt(p[1]), win: p[2]?.trim().toUpperCase() === 'J', time: p[3]?.trim() };
         }).filter(g => g.name && !isNaN(g.size) && g.time);
 
         guests.sort((a, b) => (b.win - a.win) || (b.size - a.size));
@@ -167,13 +171,13 @@
             if (match) {
                 if(!allocations.has(match.id)) allocations.set(match.id, {});
                 allocations.get(match.id)[g.time] = g;
-            } else failed.push(`${g.name} (${g.size}pax) @ ${g.time}`);
+            } else failed.push(`${g.name} (${g.size} pers.) kl. ${g.time}`);
         });
 
         const errPanel = document.getElementById('unseated');
         if (failed.length > 0) {
             errPanel.style.display = 'block';
-            errPanel.innerHTML = `<strong>Attention: Unseated Guests</strong><br>• ` + failed.join('<br>• ');
+            errPanel.innerHTML = `<strong>Advarsel: Gæster uden bord</strong><br>• ` + failed.join('<br>• ');
         } else errPanel.style.display = 'none';
 
         renderDeck();
@@ -181,16 +185,16 @@
 
     function manualReassign(currentId, activeTime) {
         const guest = allocations.get(currentId)[activeTime];
-        const newId = prompt(`Moving ${guest.name} (${activeTime} Shift)\nEnter New Table ID:`);
+        const newId = prompt(`Flytter ${guest.name} (${activeTime})\nIndtast nyt bordnummer:`);
         if(!newId) return;
 
         const target = deck.find(t => t.id === newId);
-        if(!target) return alert(`Table ${newId} does not exist.`);
+        if(!target) return alert(`Bord ${newId} findes ikke.`);
         
         if(!allocations.has(newId)) allocations.set(newId, {});
-        if(allocations.get(newId)[activeTime]) return alert(`Table ${newId} is already occupied at ${activeTime}.`);
+        if(allocations.get(newId)[activeTime]) return alert(`Bord ${newId} er allerede optaget kl. ${activeTime}.`);
         
-        if(target.seats < guest.size && !confirm(`Overcapacity Warning: Moving ${guest.size} pax to a ${target.seats}-seat table. Proceed?`)) return;
+        if(target.seats < guest.size && !confirm(`Kapacitetsadvarsel: Flytter ${guest.size} personer til et bord med ${target.seats} pladser. Fortsæt?`)) return;
 
         delete allocations.get(currentId)[activeTime];
         allocations.get(newId)[activeTime] = guest;
