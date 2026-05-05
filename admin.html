@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skansagadur - Deck Architect</title>
+    <title>Skansagarður - Bordplan Admin</title>
     <style>
         :root {
             --glass-bg: rgba(15, 23, 42, 0.85);
@@ -76,10 +76,10 @@
 <body>
 
 <div id="sidebar">
-    <h2>Fleet Architect</h2>
+    <h2>Skansagarður Admin</h2>
     
     <!-- Timeline Settings -->
-    <h3>Time Slots & Colors</h3>
+    <h3>Spisetider & Farver</h3>
     <div class="control-group flex-row">
         <input type="time" id="s-time" value="18:30">
         <input type="color" id="s-color" value="#0ea5e9">
@@ -88,37 +88,37 @@
     <div id="shift-list" style="margin-bottom: 20px;"></div>
 
     <!-- Table Building -->
-    <h3>Table Deployment</h3>
+    <h3>Opret Borde</h3>
     <div class="control-group">
-        <label>Table ID (Auto-Increments)</label>
-        <input type="text" id="t-id" placeholder="e.g., 60">
+        <label>Bordnummer (Stiger auto.)</label>
+        <input type="text" id="t-id" placeholder="F.eks. 60">
     </div>
 
     <div class="control-group">
-        <label>Configuration (Geometry)</label>
+        <label>Bordtype & Siddepladser</label>
         <select id="t-config">
-            <option value="square|2">Narrow - 2 Seats (1v1)</option>
-            <option value="square|4" selected>Square - 4 Seats (2v2)</option>
-            <option value="rect|6">Rectangle - 6 Seats (3v3)</option>
-            <option value="round|4">Round - 4 Seats</option>
-            <option value="round|6">Round - 6 Seats</option>
+            <option value="square|2">Smal - 2 Personer (1 mod 1)</option>
+            <option value="square|4" selected>Firkantet - 4 Personer (2 mod 2)</option>
+            <option value="rect|6">Aflangt - 6 Personer (3 mod 3)</option>
+            <option value="round|4">Rundt - 4 Personer</option>
+            <option value="round|6">Rundt - 6 Personer</option>
         </select>
     </div>
 
     <div class="control-group">
-        <label>Window Priority Seating?</label>
+        <label>Vinduesplads (Prioritet)?</label>
         <select id="t-win">
-            <option value="false">Standard Core</option>
-            <option value="true">Window View (Priority)</option>
+            <option value="false">Nej - Standardplads</option>
+            <option value="true">Ja - Vinduesplads</option>
         </select>
     </div>
 
-    <button class="btn-add" id="addTableBtn">Deploy Table</button>
+    <button class="btn-add" id="addTableBtn">Tilføj Bord</button>
     
     <div style="flex-grow: 1;"></div>
 
-    <button class="btn-save" id="saveBtn">💾 Commit Manifest</button>
-    <button class="btn-clear" id="wipeBtn">⚠️ Purge Deck</button>
+    <button class="btn-save" id="saveBtn">💾 Gem Bordplan</button>
+    <button class="btn-clear" id="wipeBtn">⚠️ Ryd Hele Planen</button>
 </div>
 
 <div id="workspace">
@@ -202,12 +202,12 @@
                 ${chairsHTML}
                 <div class="surface" style="width:100%; height:100%; border-radius:${br};">
                     <span style="transform: rotate(-${t.rotation || 0}deg); display:flex; flex-direction:column; align-items:center;">
-                        ${t.id}<span style="font-size:9px; font-weight:normal;">${t.seats}</span>
+                        ${t.id}<span style="font-size:9px; font-weight:normal;">${t.seats} pers.</span>
                     </span>
                 </div>
                 <div class="node-menu" style="transform: translateX(-50%) rotate(-${t.rotation || 0}deg);">
-                    <button class="node-btn rotate-btn" data-id="${t.id}">↻</button>
-                    <button class="node-btn del-btn" style="background:#ef4444;" data-id="${t.id}">✕</button>
+                    <button class="node-btn rotate-btn" data-id="${t.id}">↻ Vend</button>
+                    <button class="node-btn del-btn" style="background:#ef4444;" data-id="${t.id}">Slet</button>
                 </div>
             `;
             
@@ -247,7 +247,7 @@
     document.getElementById('addTableBtn').addEventListener('click', () => {
         const idInput = document.getElementById('t-id');
         let id = idInput.value.trim();
-        if(!id || deck.find(x => x.id === id)) return alert("Invalid or duplicate ID.");
+        if(!id || deck.find(x => x.id === id)) return alert("Ugyldigt eller allerede brugt bordnummer.");
 
         const config = document.getElementById('t-config').value.split('|');
         deck.push({ id, shape: config[0], seats: parseInt(config[1]), win: document.getElementById('t-win').value === 'true', x: 200, y: 200, rotation: 0 });
@@ -260,11 +260,11 @@
     document.getElementById('saveBtn').addEventListener('click', () => {
         localStorage.setItem('skansagadur_manifest_2025', JSON.stringify(deck));
         localStorage.setItem('skansagadur_settings_2025', JSON.stringify(settings));
-        alert("Manifest and Settings Saved!");
+        alert("Bordplan og indstillinger er gemt lokalt!");
     });
 
     document.getElementById('wipeBtn').addEventListener('click', () => {
-        if(confirm("DANGER: Purge entire deck?")) {
+        if(confirm("ADVARSEL: Dette vil slette hele bordplanen. Vil du fortsætte?")) {
             deck = [];
             localStorage.removeItem('skansagadur_manifest_2025');
             renderDeck();
