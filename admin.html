@@ -6,13 +6,17 @@
     <title>Skansagarður - Bordplan Admin</title>
     <style>
         :root {
-            --glass-bg: rgba(15, 23, 42, 0.85);
+            /* Smyril Line Brand Colors */
+            --smyril-navy: #002b5c;
+            --smyril-red: #e3000f;
+            --smyril-blue: #0056a3;
+            
+            --glass-bg: rgba(0, 43, 92, 0.90); /* Navy Glass */
             --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #0ea5e9;
-            --surface: #e2e8f0;
-            --chair: #64748b;
+            --surface: #ffffff;
+            --chair: #cbd5e1;
             --text: #f8fafc;
-            --danger: #ef4444;
+            --danger: #ff4444;
         }
 
         body {
@@ -29,48 +33,48 @@
         }
 
         h2 { font-weight: 300; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); font-size: 20px; text-transform: uppercase; letter-spacing: 2px; }
-        h3 { font-size: 14px; color: var(--accent); margin: 15px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        h3 { font-size: 14px; color: var(--text); margin: 15px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; text-transform: uppercase; }
 
         .control-group { margin-bottom: 12px; }
-        label { display: block; font-size: 10px; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; font-weight: 600; }
+        label { display: block; font-size: 10px; text-transform: uppercase; color: #cbd5e1; margin-bottom: 4px; font-weight: 600; }
         input, select {
-            width: 100%; box-sizing: border-box; padding: 10px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border); color: white; border-radius: 6px; outline: none; font-family: inherit;
+            width: 100%; box-sizing: border-box; padding: 10px; background: rgba(255,255,255,0.1);
+            border: 1px solid var(--glass-border); color: white; border-radius: 4px; outline: none; font-family: inherit;
         }
-        input:focus, select:focus { border-color: var(--accent); }
-        option { background: #0f172a; color: white; }
+        input:focus, select:focus { border-color: var(--smyril-red); background: rgba(255,255,255,0.15); }
+        option { background: var(--smyril-navy); color: white; }
 
         .flex-row { display: flex; gap: 10px; }
-        .flex-row input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+        .flex-row input[type="color"] { padding: 2px; height: 38px; cursor: pointer; border-radius: 4px; }
 
         button {
-            width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold;
+            width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold;
             text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; margin-top: 5px; font-size: 11px;
         }
-        .btn-add { background: var(--accent); color: #0f172a; }
-        .btn-add:hover { background: #38bdf8; }
-        .btn-save { background: #10b981; color: white; margin-top: 20px; }
-        .btn-save:hover { background: #34d399; }
+        .btn-add { background: var(--smyril-red); color: white; }
+        .btn-add:hover { background: #ff1a27; box-shadow: 0 0 10px rgba(227, 0, 15, 0.5); }
+        .btn-save { background: var(--smyril-blue); color: white; margin-top: 20px; }
+        .btn-save:hover { background: #006bcf; }
         .btn-clear { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
         .btn-clear:hover { background: var(--danger); color: white; }
 
         .time-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 4px 4px 0 0; font-size: 11px; border: 1px solid var(--glass-border); }
         .color-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        #workspace { flex-grow: 1; position: relative; overflow: auto; background: rgba(15, 23, 42, 0.6); }
+        #workspace { flex-grow: 1; position: relative; overflow: auto; background: rgba(0, 43, 92, 0.4); }
         #canvas { width: 2000px; height: 1500px; position: relative; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; }
 
         .table-node { position: absolute; display: flex; align-items: center; justify-content: center; cursor: grab; user-select: none; transform-origin: center center; }
         .table-node:active { cursor: grabbing; z-index: 100; }
         
-        .surface { background: var(--surface); color: #0f172a; border: 2px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .is-window .surface { border-color: var(--accent); box-shadow: 0 0 15px rgba(14,165,233,0.5); }
-        .chair { position: absolute; background: var(--chair); border: 1px solid #334155; border-radius: 50%; width: 14px; height: 14px; z-index: 5; }
+        .surface { background: var(--surface); color: var(--smyril-navy); border: 2px solid #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; z-index: 10; position: relative; box-shadow: 0 5px 10px rgba(0,0,0,0.3); }
+        .is-window .surface { border-color: var(--smyril-blue); box-shadow: 0 0 15px rgba(0, 86, 163, 0.6); }
+        .chair { position: absolute; background: var(--chair); border: 1px solid #94a3b8; border-radius: 50%; width: 14px; height: 14px; z-index: 5; }
 
-        .node-menu { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); padding: 5px; border-radius: 6px; display: none; gap: 5px; z-index: 20; border: 1px solid var(--glass-border); }
+        .node-menu { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--smyril-navy); padding: 5px; border-radius: 4px; display: none; gap: 5px; z-index: 20; border: 1px solid var(--glass-border); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .table-node:hover .node-menu { display: flex; }
-        .node-btn { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; text-transform: none; margin: 0; width: auto; }
-        .node-btn:hover { background: var(--accent); }
+        .node-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 4px 8px; border-radius: 2px; cursor: pointer; font-size: 10px; text-transform: none; margin: 0; width: auto; font-weight: normal; }
+        .node-btn:hover { background: var(--smyril-blue); }
     </style>
 </head>
 <body>
@@ -79,10 +83,10 @@
     <h2>Skansagarður Admin</h2>
     
     <!-- Timeline Settings -->
-    <h3>Spisetider & Farver</h3>
+    <h3>Buffet Spisetider</h3>
     <div class="control-group flex-row">
         <input type="time" id="s-time" value="18:30">
-        <input type="color" id="s-color" value="#0ea5e9">
+        <input type="color" id="s-color" value="#0056a3">
         <button class="btn-add" style="margin:0; width:auto; padding: 0 15px;" id="addShiftBtn">+</button>
     </div>
     <div id="shift-list" style="margin-bottom: 20px;"></div>
@@ -109,7 +113,7 @@
         <label>Vinduesplads (Prioritet)?</label>
         <select id="t-win">
             <option value="false">Nej - Standardplads</option>
-            <option value="true">Ja - Vinduesplads</option>
+            <option value="true">Ja - Vindue</option>
         </select>
     </div>
 
@@ -138,7 +142,7 @@
         settings.shifts.forEach((s, index) => {
             const badge = document.createElement('div');
             badge.className = 'time-badge';
-            badge.innerHTML = `<div class="color-dot" style="background:${s.color}"></div> ${s.time} <span style="cursor:pointer; color:#ef4444;" data-index="${index}" class="del-shift">✕</span>`;
+            badge.innerHTML = `<div class="color-dot" style="background:${s.color}"></div> ${s.time} <span style="cursor:pointer; color:#ff4444;" data-index="${index}" class="del-shift">✕</span>`;
             shiftList.appendChild(badge);
         });
 
@@ -163,7 +167,7 @@
             let surfaceW, surfaceH, br, chairsHTML = '';
 
             if (t.shape === 'square' || t.shape === 'rect') {
-                br = '6px';
+                br = '4px';
                 if (t.seats === 2) { 
                     surfaceW = 26; surfaceH = 40; 
                 } else if (t.seats === 4) { 
@@ -207,7 +211,7 @@
                 </div>
                 <div class="node-menu" style="transform: translateX(-50%) rotate(-${t.rotation || 0}deg);">
                     <button class="node-btn rotate-btn" data-id="${t.id}">↻ Vend</button>
-                    <button class="node-btn del-btn" style="background:#ef4444;" data-id="${t.id}">Slet</button>
+                    <button class="node-btn del-btn" style="background:#e3000f;" data-id="${t.id}">Slet</button>
                 </div>
             `;
             
@@ -215,7 +219,6 @@
             canvas.appendChild(node);
         });
 
-        // Attach event listeners safely
         document.querySelectorAll('.rotate-btn').forEach(btn => {
             btn.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -234,7 +237,6 @@
         });
     }
 
-    // Wiring up sidebar buttons
     document.getElementById('addShiftBtn').addEventListener('click', () => {
         const time = document.getElementById('s-time').value;
         const color = document.getElementById('s-color').value;
@@ -271,12 +273,9 @@
         }
     });
 
-    // Rock-Solid Dragging Logic
     function startDrag(e) {
         if (e.target.closest('.node-menu') || e.target.tagName === 'BUTTON') return;
         dragObj = e.currentTarget;
-        
-        // Math calculating exact mouse grab position inside the element
         const rect = dragObj.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
@@ -284,12 +283,10 @@
 
     document.addEventListener('mousemove', (e) => {
         if (dragObj) {
-            // Get mouse position relative to the scrolling canvas container
             const canvasRect = canvas.getBoundingClientRect();
             let mouseX = e.clientX - canvasRect.left;
             let mouseY = e.clientY - canvasRect.top;
             
-            // Subtract grab offset and snap to 10px grid
             let newX = Math.round((mouseX - offsetX) / 10) * 10;
             let newY = Math.round((mouseY - offsetY) / 10) * 10;
 
